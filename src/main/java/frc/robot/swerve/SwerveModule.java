@@ -4,8 +4,11 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import frc.robot.Constants;
 
@@ -14,6 +17,7 @@ public class SwerveModule<T extends MotorController> {
     private final T steeringMotor;
     private final PIDController controller;
     public final CANCoder encoder;
+    public RelativeEncoder driveEncoder;
 
     public Vector2d position;
     private boolean isCalibrating;
@@ -34,6 +38,7 @@ public class SwerveModule<T extends MotorController> {
     public SwerveModule(T driveMotor, T steeringMotor, CANCoder encoder, PIDGains pidGains, Vector2d position, double encoderOffsetAngle) {
         this.driveMotor = driveMotor;
         if (driveMotor instanceof CANSparkMax) {
+            driveEncoder = ((CANSparkMax) driveMotor).getEncoder();
             ((CANSparkMax) driveMotor).setSmartCurrentLimit(80, 40);
             ((CANSparkMax) driveMotor).setOpenLoopRampRate(Constants.Swerve.driveRampRate);
             ((CANSparkMax) steeringMotor).setOpenLoopRampRate(Constants.Swerve.rotRampRate);
@@ -122,5 +127,9 @@ public class SwerveModule<T extends MotorController> {
         double theta = position.angle - driveVector.angle;
         Vector2d velocityVector = new Vector2d(driveVector.magnitude - position.magnitude * rotSpeed * Math.sin(theta), rotSpeed * position.magnitude * Math.cos(theta));
         drive(velocityVector.magnitude, velocityVector.angle + driveVector.angle - Math.PI / 2);
+    }
+
+    public SwerveModulePosition getOdometryData() {
+        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getAngleRadians()));
     }
 }

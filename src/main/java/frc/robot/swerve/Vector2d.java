@@ -1,5 +1,7 @@
 package frc.robot.swerve;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 public class Vector2d {
     public final double x;
     public final double y;
@@ -51,9 +53,10 @@ public class Vector2d {
 
     public Vector2d rotate(double angle) {
         return new Vector2d(this.magnitude, this.angle + angle, false);
-        /*double cos = Math.cos(angle); // Doing the trig calculation once and assigning the output to a variable is the most computationally efficient solution
-        double sin = Math.sin(angle);
-        return new Vector2d(x * cos - y * sin, x * sin + y * cos);*/ // Returns a vector with an angle of 180 degrees for some odd reason if x and y are 0.  Why?
+    }
+
+    public Translation2d toTranslation2d() {
+        return new Translation2d(x, y);
     }
 
 }

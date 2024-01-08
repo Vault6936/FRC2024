@@ -4,7 +4,10 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.swerve.PIDGains;
 import frc.robot.swerve.SwerveChassis;
@@ -15,7 +18,7 @@ import frc.robot.webdashboard.DashboardLayout;
 import java.util.ArrayList;
 
 import static frc.robot.Constants.CANIds;
-import static frc.robot.Constants.SwerveModuleTest.testMode;
+import static frc.robot.Constants.SwerveModuleTest.swerveTestMode;
 import static frc.robot.Constants.SwerveModuleTest.testModuleIndex;
 import static frc.robot.GlobalVariables.pose;
 
@@ -27,6 +30,9 @@ public class DriveSubsystem extends SubsystemBase {
     final SwerveModule<CANSparkMax> rightBack;
     SwerveChassis<CANSparkMax> chassis;
     PIDGains swervePIDGains;
+
+    SwerveDriveKinematics kinematics;
+    SwerveDriveOdometry odometry;
 
     private static DriveSubsystem instance;
 
@@ -45,6 +51,9 @@ public class DriveSubsystem extends SubsystemBase {
         chassis.setDriveLimit(SwerveChassis.DriveLimits.NONE);
         chassis.setRotationLimit(SwerveChassis.DriveLimits.NONE);
         gyro = new AHRS();
+
+        kinematics = new SwerveDriveKinematics(leftFront.position.toTranslation2d(), rightFront.position.toTranslation2d(), leftBack.position.toTranslation2d(), rightBack.position.toTranslation2d());
+        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
     }
 
     public ArrayList<SwerveModule<CANSparkMax>> getModules() {
@@ -53,11 +62,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void drive(double x, double y, double rot) {
 
-        if (testMode) {
+        if (swerveTestMode) {
             Vector2d vector = new Vector2d(x, y);
             chassis.modules.get(testModuleIndex).drive(vector.magnitude, vector.angle);
         } else {
-            //DashboardLayout.setNodeValue("joystick", "x: " + x + "\ry: " + y);
             chassis.drive(x, -y, rot);
         }
     }
@@ -75,12 +83,13 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        pose = new Pose2d(0, 0, gyro.getRotation2d());
+        pose = odometry.update(new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
+
         DashboardLayout.setNodeValue("encoder1", leftFront.encoder.getAbsolutePosition());
         DashboardLayout.setNodeValue("encoder2", rightFront.encoder.getAbsolutePosition());
         DashboardLayout.setNodeValue("encoder3", leftBack.encoder.getAbsolutePosition());
         DashboardLayout.setNodeValue("encoder4", rightBack.encoder.getAbsolutePosition());
-        DashboardLayout.setNodeValue("test mode", testMode);
+        DashboardLayout.setNodeValue("test mode", swerveTestMode);
     }
 
     public static DriveSubsystem getInstance() {

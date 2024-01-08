@@ -80,6 +80,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
+        DriveSubsystem.getInstance().calibrateGyro();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
