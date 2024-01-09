@@ -47,7 +47,7 @@ public class SwerveChassis<T extends MotorController> {
         modules.add(rightBack);
 
         // Normalize the radii
-        double largest = 1.0;
+        double largest = 0.0;
         for (SwerveModule<T> module : modules) {
             if (module.position.magnitude > largest) {
                 largest = module.position.magnitude;

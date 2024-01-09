@@ -20,6 +20,7 @@ public final class Constants {
     }
 
     public static class CANIds {
+        public static final int PDH_ID = 1;
         public static final SwerveCANId leftFront = new SwerveCANId(4, 5, 22); // module 2
         public static final SwerveCANId rightFront = new SwerveCANId(2, 3, 21); // module 1
         public static final SwerveCANId leftBack = new SwerveCANId(6, 7, 23); // module 3
