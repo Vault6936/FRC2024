@@ -1,8 +1,8 @@
 package frc.robot.swerve;
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.MathUtil;
@@ -10,17 +10,16 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import frc.robot.Constants;
+import frc.robot.Constants.Swerve;
 
 public class SwerveModule<T extends MotorController> {
     private final T driveMotor;
     private final T steeringMotor;
     private final PIDController controller;
-    public final CANCoder encoder;
+    public final CANcoder encoder;
     public RelativeEncoder driveEncoder;
-
-    public Vector2d position;
-    private boolean isCalibrating;
+    public final Vector2d position;
+    protected double radius; // The distance from the center of the robot to the wheel
 
     private MotorDirection driveDirection = MotorDirection.FORWARD;
     private MotorDirection turnDirection = MotorDirection.FORWARD;
@@ -35,29 +34,31 @@ public class SwerveModule<T extends MotorController> {
         }
     }
 
-    public SwerveModule(T driveMotor, T steeringMotor, CANCoder encoder, PIDGains pidGains, Vector2d position, double encoderOffsetAngle) {
+    public SwerveModule(T driveMotor, T steeringMotor, CANcoder encoder, PIDGains pidGains, Vector2d position, double encoderOffsetAngle) {
         this.driveMotor = driveMotor;
         if (driveMotor instanceof CANSparkMax) {
             driveEncoder = ((CANSparkMax) driveMotor).getEncoder();
             ((CANSparkMax) driveMotor).setSmartCurrentLimit(80, 40);
-            ((CANSparkMax) driveMotor).setOpenLoopRampRate(Constants.Swerve.driveRampRate);
-            ((CANSparkMax) steeringMotor).setOpenLoopRampRate(Constants.Swerve.rotRampRate);
+            ((CANSparkMax) driveMotor).setOpenLoopRampRate(Swerve.driveRampRate);
+            ((CANSparkMax) steeringMotor).setOpenLoopRampRate(Swerve.rotRampRate);
         }
         this.steeringMotor = steeringMotor;
         this.encoder = encoder;
-        encoder.configMagnetOffset(encoderOffsetAngle);
+        MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
+        magnetSensorConfigs.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        magnetSensorConfigs.MagnetOffset = encoderOffsetAngle / 360;
+        encoder.getConfigurator().apply(magnetSensorConfigs);
         this.position = position;
         controller = new PIDController(pidGains.kP, pidGains.kI, pidGains.kD);
         boot();
     }
 
-    public SwerveModule(T driveMotor, T steeringMotor, CANCoder encoder, PIDGains pidGains) {
+    public SwerveModule(T driveMotor, T steeringMotor, CANcoder encoder, PIDGains pidGains) {
         this(driveMotor, steeringMotor, encoder, pidGains, new Vector2d(1, 1), 0);
     }
 
     public void boot() {
-        encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360); //Must only be set to this value!
-        encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+        driveEncoder.setPosition(0);
     }
 
     public void setDriveMotorDirection(MotorDirection direction) {
@@ -68,17 +69,8 @@ public class SwerveModule<T extends MotorController> {
         turnDirection = direction;
     }
 
-    public void calibrateWheels() {
-        isCalibrating = Math.abs(drive(0, 0)) < 0.0087; //Half of a degree
-    }
-
-
-    public boolean doneCalibrating() {
-        return isCalibrating;
-    }
-
     public double getAngleRadians() {
-        return encoder.getAbsolutePosition() / 180 * Math.PI;
+        return encoder.getAbsolutePosition().getValue() * 2 * Math.PI;
     }
 
     private static double unsigned_0_to_2PI(double angle) {
@@ -125,11 +117,11 @@ public class SwerveModule<T extends MotorController> {
 
     public void rotateAndDrive(Vector2d driveVector, double rotSpeed) {
         double theta = position.angle - driveVector.angle;
-        Vector2d velocityVector = new Vector2d(driveVector.magnitude - position.magnitude * rotSpeed * Math.sin(theta), rotSpeed * position.magnitude * Math.cos(theta));
+        Vector2d velocityVector = new Vector2d(driveVector.magnitude - radius * rotSpeed * Math.sin(theta), radius * rotSpeed * Math.cos(theta));
         drive(velocityVector.magnitude, velocityVector.angle + driveVector.angle - Math.PI / 2);
     }
 
     public SwerveModulePosition getOdometryData() {
-        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getAngleRadians()));
+        return new SwerveModulePosition(driveEncoder.getPosition() / Swerve.neoTicksPerRev * Swerve.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians()));
     }
 }

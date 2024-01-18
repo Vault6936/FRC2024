@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -9,27 +9,21 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.swerve.PIDGains;
-import frc.robot.swerve.SwerveChassis;
-import frc.robot.swerve.SwerveModule;
-import frc.robot.swerve.Vector2d;
+import frc.robot.swerve.*;
 import frc.robot.webdashboard.DashboardLayout;
-
 import java.util.ArrayList;
-
 import static frc.robot.Constants.CANIds;
 import static frc.robot.Constants.SwerveModuleTest.swerveTestMode;
 import static frc.robot.Constants.SwerveModuleTest.testModuleIndex;
 import static frc.robot.GlobalVariables.pose;
 
 public class DriveSubsystem extends SubsystemBase {
-    AHRS gyro;
+    public final AHRS gyro;
     final SwerveModule<CANSparkMax> leftFront;
     final SwerveModule<CANSparkMax> rightFront;
     final SwerveModule<CANSparkMax> leftBack;
     final SwerveModule<CANSparkMax> rightBack;
-    SwerveChassis<CANSparkMax> chassis;
-    PIDGains swervePIDGains;
+    private final SwerveChassis<CANSparkMax> chassis;
 
     SwerveDriveKinematics kinematics;
     SwerveDriveOdometry odometry;
@@ -37,16 +31,18 @@ public class DriveSubsystem extends SubsystemBase {
     private static DriveSubsystem instance;
 
     private DriveSubsystem() {
-        swervePIDGains = new PIDGains(0.3, 0.01, 0.0005);
-        leftFront = new SwerveModule<>(new CANSparkMax(CANIds.leftFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANCoder(CANIds.leftFront.encoder), swervePIDGains, new Vector2d(-1, 1), 45 - 3.07);
+        double distance = new Distance(12.375, Distance.Unit.IN).getValueM();
+        PIDGains swervePIDGains = new PIDGains(0.5, 0.01, 0.001);
+        leftFront = new SwerveModule<>(new CANSparkMax(CANIds.leftFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftFront.encoder), swervePIDGains, new Vector2d(-distance, distance), -40);
         leftFront.setSteeringMotorDirection(SwerveModule.MotorDirection.REVERSE);
-        rightFront = new SwerveModule<>(new CANSparkMax(CANIds.rightFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANCoder(CANIds.rightFront.encoder), swervePIDGains, new Vector2d(1, 1), 110 + 0.615);
+        rightFront = new SwerveModule<>(new CANSparkMax(CANIds.rightFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightFront.encoder), swervePIDGains, new Vector2d(distance, distance), 24);
         rightFront.setSteeringMotorDirection(SwerveModule.MotorDirection.REVERSE);
         rightFront.setDriveMotorDirection(SwerveModule.MotorDirection.REVERSE);
-        leftBack = new SwerveModule<>(new CANSparkMax(CANIds.leftBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANCoder(CANIds.leftBack.encoder), swervePIDGains, new Vector2d(-1, -1), 135 + 7.207);
+        leftBack = new SwerveModule<>(new CANSparkMax(CANIds.leftBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftBack.encoder), swervePIDGains, new Vector2d(-distance, -distance), -35);
         leftBack.setSteeringMotorDirection(SwerveModule.MotorDirection.REVERSE);
-        rightBack = new SwerveModule<>(new CANSparkMax(CANIds.rightBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANCoder(CANIds.rightBack.encoder), swervePIDGains, new Vector2d(1, -1), 145 - 1.582);
+        rightBack = new SwerveModule<>(new CANSparkMax(CANIds.rightBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightBack.encoder), swervePIDGains, new Vector2d(distance, -distance), -34);
         rightBack.setSteeringMotorDirection(SwerveModule.MotorDirection.REVERSE);
+        rightBack.setDriveMotorDirection(SwerveModule.MotorDirection.REVERSE);
         chassis = new SwerveChassis<>(leftFront, rightFront, leftBack, rightBack);
         chassis.setDriveLimit(SwerveChassis.DriveLimits.NONE);
         chassis.setRotationLimit(SwerveChassis.DriveLimits.NONE);
@@ -66,13 +62,8 @@ public class DriveSubsystem extends SubsystemBase {
             Vector2d vector = new Vector2d(x, y);
             chassis.modules.get(testModuleIndex).drive(vector.magnitude, vector.angle);
         } else {
-            chassis.drive(x, -y, rot);
+            chassis.drive(x, -y, -rot);
         }
-    }
-
-    public void zeroNavX() {
-        gyro.zeroYaw();
-        gyro.calibrate();
     }
 
     public void calibrateGyro() {
@@ -83,12 +74,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        pose = odometry.update(new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
+        pose = odometry.update(new Rotation2d(Math.toRadians(-gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
 
-        DashboardLayout.setNodeValue("encoder1", leftFront.encoder.getAbsolutePosition());
-        DashboardLayout.setNodeValue("encoder2", rightFront.encoder.getAbsolutePosition());
-        DashboardLayout.setNodeValue("encoder3", leftBack.encoder.getAbsolutePosition());
-        DashboardLayout.setNodeValue("encoder4", rightBack.encoder.getAbsolutePosition());
+        DashboardLayout.setNodeValue("encoder1", leftFront.getAngleRadians() * 180 / Math.PI);
+        DashboardLayout.setNodeValue("encoder2", rightFront.getAngleRadians() * 180 / Math.PI);
+        DashboardLayout.setNodeValue("encoder3", leftBack.getAngleRadians() * 180 / Math.PI);
+        DashboardLayout.setNodeValue("encoder4", rightBack.getAngleRadians() * 180 / Math.PI);
+        DashboardLayout.setNodeValue("bot angle", pose.getRotation().getDegrees());
+        DashboardLayout.setNodeValue("pose", "x:" + pose.getTranslation().getX() + "y:" + pose.getTranslation().getY() + "heading:" + pose.getRotation().getRadians());
         DashboardLayout.setNodeValue("test mode", swerveTestMode);
     }
 

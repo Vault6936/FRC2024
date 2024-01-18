@@ -18,7 +18,7 @@ public class Limelight {
         tx = table.getEntry("tx");
         ty = table.getEntry("ty");
         ta = table.getEntry("ta");
-
+        table.getEntry("botpose");
     }
 
     // Read values periodically
