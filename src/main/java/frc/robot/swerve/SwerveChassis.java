@@ -1,10 +1,9 @@
 package frc.robot.swerve;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
+import frc.robot.webdashboard.DashboardLayout;
 
 import java.util.ArrayList;
-
 import static frc.robot.Constants.Swerve;
 import static frc.robot.GlobalVariables.pose;
 
@@ -77,6 +76,7 @@ public class SwerveChassis<T extends MotorController> {
     }
 
     public void drive(double x, double y, double rot, boolean squareInputs) {
+        DashboardLayout.setNodeValue("input", "x: " + x + "y: " + y + "rot: " + rot);
         if (squareInputs) {
             x = Math.copySign(Math.pow(x, 2), x);
             y = Math.copySign(Math.pow(y, 2), y);
@@ -92,7 +92,7 @@ public class SwerveChassis<T extends MotorController> {
 
         double divisor = Math.abs(inputVector.magnitude) + Math.abs(rot);
         if (divisor > 1.0) {
-            inputVector = new Vector2d(inputVector.magnitude / divisor, inputVector.angle);
+            inputVector = new Vector2d(inputVector.magnitude / divisor, inputVector.angle, false);
             rot /= divisor;
         }
 

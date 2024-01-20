@@ -21,15 +21,17 @@ public class SwerveModule<T extends MotorController> {
     public final Vector2d position;
     protected double radius; // The distance from the center of the robot to the wheel
 
-    private MotorDirection driveDirection = MotorDirection.FORWARD;
-    private MotorDirection turnDirection = MotorDirection.FORWARD;
+    private Direction driveDirection = Direction.FORWARD;
+    private Direction turnDirection = Direction.FORWARD;
 
-    public enum MotorDirection {
+    private Direction encoderPolarity  = Direction.FORWARD;
+
+    public enum Direction {
         FORWARD(1),
         REVERSE(-1);
         private final int direction;
 
-        MotorDirection(int direction) {
+        Direction(int direction) {
             this.direction = direction;
         }
     }
@@ -53,20 +55,20 @@ public class SwerveModule<T extends MotorController> {
         boot();
     }
 
-    public SwerveModule(T driveMotor, T steeringMotor, CANcoder encoder, PIDGains pidGains) {
-        this(driveMotor, steeringMotor, encoder, pidGains, new Vector2d(1, 1), 0);
-    }
-
     public void boot() {
         driveEncoder.setPosition(0);
     }
 
-    public void setDriveMotorDirection(MotorDirection direction) {
+    public void setDriveMotorDirection(Direction direction) {
         driveDirection = direction;
     }
 
-    public void setSteeringMotorDirection(MotorDirection direction) {
+    public void setSteeringMotorDirection(Direction direction) {
         turnDirection = direction;
+    }
+
+    public void setEncoderPolarity(Direction direction) {
+        encoderPolarity = direction;
     }
 
     public double getAngleRadians() {
@@ -97,7 +99,7 @@ public class SwerveModule<T extends MotorController> {
      * @param speed The speed to set the drive motor to.  It should be between -1.0 and 1.0.
      * @param targetAngle The desired angle, in radians, of the module.
      */
-    public double drive(double speed, double targetAngle) {
+    public void drive(double speed, double targetAngle) {
         targetAngle = unsigned_0_to_2PI(targetAngle);
         double currentAngle = getAngleRadians();
 
@@ -111,8 +113,6 @@ public class SwerveModule<T extends MotorController> {
 
         driveMotor.set(MathUtil.clamp(speed * polarity * driveDirection.direction, -1.0, 1.0));
         steeringMotor.set(MathUtil.clamp(controller.calculate(0, err), -1.0, 1.0) * turnDirection.direction);
-
-        return currentAngle;
     }
 
     public void rotateAndDrive(Vector2d driveVector, double rotSpeed) {
@@ -122,6 +122,6 @@ public class SwerveModule<T extends MotorController> {
     }
 
     public SwerveModulePosition getOdometryData() {
-        return new SwerveModulePosition(driveEncoder.getPosition() / Swerve.neoTicksPerRev * Swerve.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians()));
+        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Swerve.neoTicksPerRev * Swerve.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians()));
     }
 }
