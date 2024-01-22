@@ -12,28 +12,18 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 
 public class SwerveModule<T extends MotorController> {
+    public final CANcoder encoder;
+    public final Vector2d position;
     private final T driveMotor;
     private final T steeringMotor;
     private final PIDController controller;
-    public final CANcoder encoder;
     public RelativeEncoder driveEncoder;
-    public final Vector2d position;
     protected double radius; // The distance from the center of the robot to the wheel
 
     private Direction driveDirection = Direction.FORWARD;
     private Direction turnDirection = Direction.FORWARD;
 
-    private Direction encoderPolarity  = Direction.FORWARD;
-
-    public enum Direction {
-        FORWARD(1),
-        REVERSE(-1);
-        private final int direction;
-
-        Direction(int direction) {
-            this.direction = direction;
-        }
-    }
+    private Direction encoderPolarity = Direction.FORWARD;
 
     public SwerveModule(T driveMotor, T steeringMotor, CANcoder encoder, PIDGains pidGains, Vector2d position, double encoderOffsetAngle) {
         this.driveMotor = driveMotor;
@@ -97,6 +87,16 @@ public class SwerveModule<T extends MotorController> {
     }
 
     public SwerveModulePosition getOdometryData() {
-        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Constants.neoTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians() + Math.PI / 2));
+        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Constants.driveMotorTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians() + Math.PI / 2));
+    }
+
+    public enum Direction {
+        FORWARD(1),
+        REVERSE(-1);
+        private final int direction;
+
+        Direction(int direction) {
+            this.direction = direction;
+        }
     }
 }

@@ -6,13 +6,13 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.GyroCalibrateCommand;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.swerve.SwerveModule;
 import frc.robot.vision.Limelight;
 import frc.robot.webdashboard.DashboardLayout;
 import frc.robot.webdashboard.WebdashboardServer;
@@ -25,14 +25,12 @@ import frc.robot.webdashboard.WebdashboardServer;
  * project.
  */
 public class Robot extends TimedRobot {
-    private Command autonomousCommand;
 
+    public static Timer timer = new Timer();
     public static RobotContainer robotContainer;
-
-    public static WebdashboardServer socket = WebdashboardServer.getInstance(5800);
-
     Limelight limelight = Limelight.getInstance();
     PowerDistribution pdh = new PowerDistribution(Constants.CANIds.PDH_ID, PowerDistribution.ModuleType.kRev);
+    private Command autonomousCommand;
 
     /**
      * This method is run when the robot is first started up and should be used for any
@@ -40,9 +38,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
-        // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        // autonomous chooser on the dashboard.
         robotContainer = new RobotContainer();
+        timer.start();
+        WebdashboardServer.getInstance(5800); // Initialize the websocket server
+        CommandScheduler.getInstance().schedule(new GyroCalibrateCommand(1000));
     }
 
 
@@ -79,10 +78,9 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousInit() {
-        DriveSubsystem.getInstance().calibrateGyro();
+        DriveSubsystem.getInstance().resetGyro();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
-        // schedule the autonomous command (example)
         if (autonomousCommand != null) {
             autonomousCommand.schedule();
         }
@@ -102,7 +100,7 @@ public class Robot extends TimedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
-        DriveSubsystem.getInstance().calibrateGyro();
+        DriveSubsystem.getInstance().resetGyro();
         DriveSubsystem.getInstance().chassis.boot();
         GlobalVariables.pose = new Pose2d();
     }

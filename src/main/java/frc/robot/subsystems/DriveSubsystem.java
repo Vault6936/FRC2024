@@ -8,12 +8,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.swerve.*;
 import frc.robot.webdashboard.DashboardLayout;
-import java.util.ArrayList;
 import static frc.robot.Constants.CANIds;
 import static frc.robot.Constants.SwerveModuleTest.swerveTestMode;
 import static frc.robot.Constants.SwerveModuleTest.testModuleIndex;
@@ -28,7 +26,6 @@ public class DriveSubsystem extends SubsystemBase {
     public final SwerveChassis<CANSparkMax> chassis;
 
     SwerveDriveKinematics kinematics;
-    SwerveDriveOdometry odometry;
 
     SwerveDrivePoseEstimator poseEstimator;
 
@@ -59,17 +56,10 @@ public class DriveSubsystem extends SubsystemBase {
         gyro = new AHRS();
 
         kinematics = new SwerveDriveKinematics(leftFront.position.toTranslation2d(), rightFront.position.toTranslation2d(), leftBack.position.toTranslation2d(), rightBack.position.toTranslation2d());
-        //odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()}, new Pose2d(0, 0, new Rotation2d(0)));
-
         poseEstimator = new SwerveDrivePoseEstimator(kinematics, getGyroRotation(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)));
     }
 
-    public ArrayList<SwerveModule<CANSparkMax>> getModules() {
-        return chassis.modules;
-    }
-
     public void drive(double x, double y, double rot) {
-
         if (swerveTestMode) {
             Vector2d vector = new Vector2d(x, y);
             chassis.modules.get(testModuleIndex).drive(vector.magnitude, vector.angle);
@@ -79,8 +69,7 @@ public class DriveSubsystem extends SubsystemBase {
         }
     }
 
-    public void calibrateGyro() {
-        gyro.calibrate();
+    public void resetGyro() {
         gyro.resetDisplacement();
         gyro.zeroYaw();
     }
@@ -94,8 +83,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
     @Override
     public void periodic() {
-        //pose = odometry.update(new Rotation2d(Math.toRadians(-gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
-
         DashboardLayout.setNodeValue("lf pose", leftFront.driveEncoder.getPosition());
         DashboardLayout.setNodeValue("rf pose", rightFront.driveEncoder.getPosition());
         DashboardLayout.setNodeValue("lb pose", leftBack.driveEncoder.getPosition());
