@@ -103,10 +103,8 @@ public class Robot extends TimedRobot {
             autonomousCommand.cancel();
         }
         DriveSubsystem.getInstance().calibrateGyro();
+        DriveSubsystem.getInstance().chassis.boot();
         GlobalVariables.pose = new Pose2d();
-        for (SwerveModule module : DriveSubsystem.getInstance().getModules()) {
-            module.boot();
-        }
     }
 
 

@@ -10,7 +10,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
-import frc.robot.Constants.Swerve;
 
 public class SwerveModule<T extends MotorController> {
     private final T driveMotor;
@@ -41,8 +40,8 @@ public class SwerveModule<T extends MotorController> {
         if (driveMotor instanceof CANSparkMax) {
             driveEncoder = ((CANSparkMax) driveMotor).getEncoder();
             ((CANSparkMax) driveMotor).setSmartCurrentLimit(80, 40);
-            ((CANSparkMax) driveMotor).setOpenLoopRampRate(Swerve.driveRampRate);
-            ((CANSparkMax) steeringMotor).setOpenLoopRampRate(Swerve.rotRampRate);
+            ((CANSparkMax) driveMotor).setOpenLoopRampRate(Constants.driveRampRate);
+            ((CANSparkMax) steeringMotor).setOpenLoopRampRate(Constants.rotRampRate);
         }
         this.steeringMotor = steeringMotor;
         this.encoder = encoder;
@@ -75,39 +74,15 @@ public class SwerveModule<T extends MotorController> {
         return encoder.getAbsolutePosition().getValue() * 2 * Math.PI;
     }
 
-    private static double unsigned_0_to_2PI(double angle) {
-        angle = angle % (2 * Math.PI); // The absolute value of the angle should never exceed 360 degrees
-        if (angle < 0) angle += 2 * Math.PI;
-        return angle;
-    }
-
-    private static double minimumMagnitude(double... values) {
-        double min = Double.POSITIVE_INFINITY;
-        for (double value : values) {
-            if (Math.abs(value) < Math.abs(min)) min = value;
-        }
-        return min;
-    }
-
-    // By always finding the minimum error, this function will avoid the type of problems that can occur when the target angle is something like 30 degrees and the wheel angle is 300.  This code would interpret the target angle as 390 degrees and calculate the error out to 90 degrees instead of 270.  Much better :)
-    private static double getError(double targetAngle, double currentAngle) {
-        return minimumMagnitude(targetAngle - currentAngle, targetAngle + 2 * Math.PI - currentAngle, targetAngle - 2 * Math.PI - currentAngle);
-    }
-
-    /***
-     *
-     * @param speed The speed to set the drive motor to.  It should be between -1.0 and 1.0.
-     * @param targetAngle The desired angle, in radians, of the module.
-     */
     public void drive(double speed, double targetAngle) {
-        targetAngle = unsigned_0_to_2PI(targetAngle);
+        targetAngle = AngleHelpers.unsigned_0_to_2PI(targetAngle);
         double currentAngle = getAngleRadians();
 
         // err is how many radians the robot is off from its target angle
-        double err = getError(targetAngle, currentAngle);
+        double err = AngleHelpers.getError(targetAngle, currentAngle);
         double polarity = 1;
         if (Math.abs(err) > Math.PI / 2) { // Most of the time, the module will drive forward.  However, if the module is more than 90 degrees away from its target angle, it is more efficient for it to drive in reverse towards a target angle offset by 180 degrees from the original.
-            err = getError((targetAngle + Math.PI) % (2 * Math.PI), currentAngle);
+            err = AngleHelpers.getError((targetAngle + Math.PI) % (2 * Math.PI), currentAngle);
             polarity = -1;
         }
 
@@ -122,6 +97,6 @@ public class SwerveModule<T extends MotorController> {
     }
 
     public SwerveModulePosition getOdometryData() {
-        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Swerve.neoTicksPerRev * Swerve.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians()));
+        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Constants.neoTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians() + Math.PI / 2));
     }
 }

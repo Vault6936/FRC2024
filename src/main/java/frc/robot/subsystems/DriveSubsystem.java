@@ -3,7 +3,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
+import com.revrobotics.CANSparkLowLevel;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -24,33 +25,43 @@ public class DriveSubsystem extends SubsystemBase {
     final SwerveModule<CANSparkMax> rightFront;
     final SwerveModule<CANSparkMax> leftBack;
     final SwerveModule<CANSparkMax> rightBack;
-    private final SwerveChassis<CANSparkMax> chassis;
+    public final SwerveChassis<CANSparkMax> chassis;
 
     SwerveDriveKinematics kinematics;
     SwerveDriveOdometry odometry;
+
+    SwerveDrivePoseEstimator poseEstimator;
 
     private static DriveSubsystem instance;
 
     private DriveSubsystem() {
         double distance = new Distance(12.375, Distance.Unit.IN).getValueM();
         PIDGains swervePIDGains = new PIDGains(0.5, 0.01, 0.001);
-        leftFront = new SwerveModule<>(new CANSparkMax(CANIds.leftFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftFront.encoder), swervePIDGains, new Vector2d(-distance, distance), -40);
+        leftFront = new SwerveModule<>(new CANSparkMax(CANIds.leftFront.driveMotor, CANSparkLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftFront.steeringMotor, CANSparkLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftFront.encoder), swervePIDGains, new Vector2d(-distance, distance), -40);
+        leftFront.setDriveMotorDirection(SwerveModule.Direction.FORWARD);
         leftFront.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
-        rightFront = new SwerveModule<>(new CANSparkMax(CANIds.rightFront.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightFront.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightFront.encoder), swervePIDGains, new Vector2d(distance, distance), 24);
-        rightFront.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
+        leftFront.setEncoderPolarity(SwerveModule.Direction.REVERSE);
+        rightFront = new SwerveModule<>(new CANSparkMax(CANIds.rightFront.driveMotor, CANSparkLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightFront.steeringMotor, CANSparkLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightFront.encoder), swervePIDGains, new Vector2d(distance, distance), 24);
         rightFront.setDriveMotorDirection(SwerveModule.Direction.REVERSE);
-        leftBack = new SwerveModule<>(new CANSparkMax(CANIds.leftBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftBack.encoder), swervePIDGains, new Vector2d(-distance, -distance), -35);
+        rightFront.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
+        rightFront.setEncoderPolarity(SwerveModule.Direction.REVERSE);
+        leftBack = new SwerveModule<>(new CANSparkMax(CANIds.leftBack.driveMotor, CANSparkLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.leftBack.steeringMotor, CANSparkLowLevel.MotorType.kBrushless), new CANcoder(CANIds.leftBack.encoder), swervePIDGains, new Vector2d(-distance, -distance), -35);
+        leftBack.setDriveMotorDirection(SwerveModule.Direction.FORWARD);
         leftBack.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
-        rightBack = new SwerveModule<>(new CANSparkMax(CANIds.rightBack.driveMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightBack.steeringMotor, CANSparkMaxLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightBack.encoder), swervePIDGains, new Vector2d(distance, -distance), -34);
-        rightBack.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
+        leftBack.setEncoderPolarity(SwerveModule.Direction.FORWARD);
+        rightBack = new SwerveModule<>(new CANSparkMax(CANIds.rightBack.driveMotor, CANSparkLowLevel.MotorType.kBrushless), new CANSparkMax(CANIds.rightBack.steeringMotor, CANSparkLowLevel.MotorType.kBrushless), new CANcoder(CANIds.rightBack.encoder), swervePIDGains, new Vector2d(distance, -distance), -34);
         rightBack.setDriveMotorDirection(SwerveModule.Direction.REVERSE);
+        rightBack.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
+        rightBack.setEncoderPolarity(SwerveModule.Direction.FORWARD);
         chassis = new SwerveChassis<>(leftFront, rightFront, leftBack, rightBack);
         chassis.setDriveLimit(SwerveChassis.DriveLimits.NONE);
         chassis.setRotationLimit(SwerveChassis.DriveLimits.NONE);
         gyro = new AHRS();
 
         kinematics = new SwerveDriveKinematics(leftFront.position.toTranslation2d(), rightFront.position.toTranslation2d(), leftBack.position.toTranslation2d(), rightBack.position.toTranslation2d());
-        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()}, new Pose2d(0, 0, new Rotation2d(0)));
+        //odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(Math.toRadians(gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()}, new Pose2d(0, 0, new Rotation2d(0)));
+
+        poseEstimator = new SwerveDrivePoseEstimator(kinematics, getGyroRotation(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)));
     }
 
     public ArrayList<SwerveModule<CANSparkMax>> getModules() {
@@ -63,6 +74,7 @@ public class DriveSubsystem extends SubsystemBase {
             Vector2d vector = new Vector2d(x, y);
             chassis.modules.get(testModuleIndex).drive(vector.magnitude, vector.angle);
         } else {
+
             chassis.drive(x, -y, -rot);
         }
     }
@@ -73,14 +85,21 @@ public class DriveSubsystem extends SubsystemBase {
         gyro.zeroYaw();
     }
 
+    private SwerveModulePosition[] getModulePositions() {
+        return new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()};
+    }
+
+    public Rotation2d getGyroRotation() {
+        return new Rotation2d(Math.toRadians(-gyro.getAngle()));
+    }
     @Override
     public void periodic() {
-        pose = odometry.update(new Rotation2d(Math.toRadians(-gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
+        //pose = odometry.update(new Rotation2d(Math.toRadians(-gyro.getAngle())), new SwerveModulePosition[]{leftFront.getOdometryData(), rightFront.getOdometryData(), leftBack.getOdometryData(), rightBack.getOdometryData()});
 
-        DashboardLayout.setNodeValue("lf pose", leftFront.getOdometryData());
-        DashboardLayout.setNodeValue("rf pose", rightFront.getOdometryData());
-        DashboardLayout.setNodeValue("lb pose", leftBack.getOdometryData());
-        DashboardLayout.setNodeValue("rb pose", rightBack.getOdometryData());
+        DashboardLayout.setNodeValue("lf pose", leftFront.driveEncoder.getPosition());
+        DashboardLayout.setNodeValue("rf pose", rightFront.driveEncoder.getPosition());
+        DashboardLayout.setNodeValue("lb pose", leftBack.driveEncoder.getPosition());
+        DashboardLayout.setNodeValue("rb pose", rightBack.driveEncoder.getPosition());
 
         DashboardLayout.setNodeValue("encoder1", leftFront.getAngleRadians() * 180 / Math.PI);
         DashboardLayout.setNodeValue("encoder2", rightFront.getAngleRadians() * 180 / Math.PI);
@@ -88,6 +107,8 @@ public class DriveSubsystem extends SubsystemBase {
         DashboardLayout.setNodeValue("encoder4", rightBack.getAngleRadians() * 180 / Math.PI);
         DashboardLayout.setNodeValue("bot angle", pose.getRotation().getDegrees());
         DashboardLayout.setNodeValue("pose", "x:" + pose.getTranslation().getX() + "y:" + pose.getTranslation().getY() + "heading:" + pose.getRotation().getRadians());
+
+        pose = poseEstimator.update(getGyroRotation(), getModulePositions());
     }
 
     public static DriveSubsystem getInstance() {

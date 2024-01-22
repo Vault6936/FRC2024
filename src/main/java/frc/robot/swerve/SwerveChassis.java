@@ -1,10 +1,11 @@
 package frc.robot.swerve;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import frc.robot.webdashboard.DashboardLayout;
 
 import java.util.ArrayList;
-import static frc.robot.Constants.Swerve;
 import static frc.robot.GlobalVariables.pose;
 
 public class SwerveChassis<T extends MotorController> {
@@ -12,8 +13,11 @@ public class SwerveChassis<T extends MotorController> {
     SwerveModule<T> rightFront;
     SwerveModule<T> leftBack;
     SwerveModule<T> rightBack;
-
     public final ArrayList<SwerveModule<T>> modules;
+
+    private double targetAngle = 0.0;
+
+    PIDController headingController;
 
     public static final class DriveLimits {
         public static final InputLimit NONE = new InputLimit() {
@@ -55,6 +59,14 @@ public class SwerveChassis<T extends MotorController> {
         for (SwerveModule<T> module : modules) {
             module.radius = module.position.magnitude / largest;
         }
+
+        headingController  = new PIDController(1, 0, 0);
+    }
+    public void boot() {
+        for (SwerveModule<T> module : modules) {
+            module.boot();
+        }
+        targetAngle = 0.0;
     }
 
     public void setDriveLimit(InputLimit inputLimit) {
@@ -85,9 +97,9 @@ public class SwerveChassis<T extends MotorController> {
         double circularDivisor = getCircularDivisor(x, y); // In the joystick API, x and y can be 1 simultaneously - the inputs are bounded by driveVector.magnitude square, not a circle, so the radius can be as high as 1.41.  This converts to circular bounds.
         x /= circularDivisor;
         y /= circularDivisor;
-        x *= Swerve.driveMultiplier;
-        y *= Swerve.driveMultiplier;
-        rot *= Swerve.rotMultiplier;
+        x *= Constants.driveMultiplier;
+        y *= Constants.driveMultiplier;
+        rot *= Constants.rotMultiplier;
         Vector2d inputVector = new Vector2d(x, y);
 
         double divisor = Math.abs(inputVector.magnitude) + Math.abs(rot);
@@ -96,12 +108,21 @@ public class SwerveChassis<T extends MotorController> {
             rot /= divisor;
         }
 
+        double currentAngle = AngleHelpers.unsigned_0_to_2PI(pose.getRotation().getRadians());
+
+        if (Math.abs(rot) < 0.05) {
+            if (Math.abs(lastInput.rot) >= 0.05) {
+                targetAngle = currentAngle;
+            }
+            rot = -MathUtil.clamp(headingController.calculate(0, AngleHelpers.getError(targetAngle, currentAngle)), -0.5, 0.5);
+        }
+
         double limitedDrive = driveLimit.getLimitedInputValue(inputVector.magnitude);
         limitedDrive = driveLimit.getLimitedAccelerationValue(lastInput.vector.magnitude, limitedDrive);
         double limitedRot = rotationLimit.getLimitedInputValue(rot);
         limitedRot = rotationLimit.getLimitedAccelerationValue(lastInput.rot, limitedRot);
         Vector2d limitedVector = new Vector2d(limitedDrive, inputVector.angle, false); // Making another vector with the limited magnitude and the same angle
-        limitedVector = limitedVector.rotate(-pose.getRotation().getRadians()); // This is necessary for field centric drive
+        limitedVector = limitedVector.rotate(-currentAngle); // This is necessary for field centric drive
 
         for (SwerveModule<T> module : modules) {
             module.rotateAndDrive(limitedVector, limitedRot);
