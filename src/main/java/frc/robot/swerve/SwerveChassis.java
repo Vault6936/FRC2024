@@ -4,24 +4,26 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import frc.robot.webdashboard.DashboardLayout;
+import frc.robot.webdashboard.WebdashboardServer;
 
 import java.util.ArrayList;
+
 
 import static frc.robot.GlobalVariables.pose;
 
 public class SwerveChassis<T extends MotorController> {
-    public final ArrayList<SwerveModule<T>> modules;
-    SwerveModule<T> leftFront;
-    SwerveModule<T> rightFront;
-    SwerveModule<T> leftBack;
-    SwerveModule<T> rightBack;
+    public final ArrayList<SwerveModule> modules;
+    SwerveModule leftFront;
+    SwerveModule rightFront;
+    SwerveModule leftBack;
+    SwerveModule rightBack;
     PIDController headingController;
     private double targetAngle = 0.0;
     private InputLimit driveLimit = DriveLimits.NONE;
     private InputLimit rotationLimit = DriveLimits.NONE;
     private DriveInput lastInput = new DriveInput(new Vector2d(), 0);
 
-    public SwerveChassis(SwerveModule<T> leftFront, SwerveModule<T> rightFront, SwerveModule<T> leftBack, SwerveModule<T> rightBack) {
+    public SwerveChassis(SwerveModule leftFront, SwerveModule rightFront, SwerveModule leftBack, SwerveModule rightBack) {
         this.leftFront = leftFront;
         this.rightFront = rightFront;
         this.leftBack = leftBack;
@@ -34,12 +36,12 @@ public class SwerveChassis<T extends MotorController> {
 
         // Normalize the radii
         double largest = 0.0;
-        for (SwerveModule<T> module : modules) {
+        for (SwerveModule module : modules) {
             if (module.position.magnitude > largest) {
                 largest = module.position.magnitude;
             }
         }
-        for (SwerveModule<T> module : modules) {
+        for (SwerveModule module : modules) {
             module.radius = module.position.magnitude / largest;
         }
 
@@ -57,7 +59,7 @@ public class SwerveChassis<T extends MotorController> {
     }
 
     public void boot() {
-        for (SwerveModule<T> module : modules) {
+        for (SwerveModule module : modules) {
             module.boot();
         }
         targetAngle = 0.0;
@@ -72,7 +74,6 @@ public class SwerveChassis<T extends MotorController> {
     }
 
     public void drive(double x, double y, double rot, boolean squareInputs) {
-        DashboardLayout.setNodeValue("input", "x: " + x + "y: " + y + "rot: " + rot);
         if (squareInputs) {
             x = Math.copySign(Math.pow(x, 2), x);
             y = Math.copySign(Math.pow(y, 2), y);
@@ -94,11 +95,18 @@ public class SwerveChassis<T extends MotorController> {
 
         double currentAngle = AngleHelpers.unsigned_0_to_2PI(pose.getRotation().getRadians());
 
-        if (Math.abs(rot) < 0.05) {
+        if (Math.abs(rot) < 0.05 && false) {
             if (Math.abs(lastInput.rot) >= 0.05) {
                 targetAngle = currentAngle;
             }
             rot = -MathUtil.clamp(headingController.calculate(0, AngleHelpers.getError(targetAngle, currentAngle)), -0.5, 0.5);
+        }
+        DashboardLayout.setNodeValue("bot target heading", Math.toDegrees(targetAngle));
+        DashboardLayout layout = WebdashboardServer.getInstance(5800).getFirstConnectedLayout();
+        try {
+            headingController.setPID(Double.parseDouble(layout.getInputValue("heading_kp")), Double.parseDouble(layout.getInputValue("heading_ki")), Double.parseDouble(layout.getInputValue("heading_kd")));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
 
         double limitedDrive = driveLimit.getLimitedInputValue(inputVector.magnitude);
@@ -108,8 +116,9 @@ public class SwerveChassis<T extends MotorController> {
         Vector2d limitedVector = new Vector2d(limitedDrive, inputVector.angle, false); // Making another vector with the limited magnitude and the same angle
         limitedVector = limitedVector.rotate(-currentAngle); // This is necessary for field centric drive
 
-        for (SwerveModule<T> module : modules) {
-            module.rotateAndDrive(limitedVector, limitedRot);
+        for (SwerveModule module : modules) {
+            module.drive(y, 0);
+            //module.rotateAndDrive(limitedVector, limitedRot);
         }
 
         lastInput = new DriveInput(limitedVector, limitedRot);

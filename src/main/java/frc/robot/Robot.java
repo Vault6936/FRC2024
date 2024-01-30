@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         limelight.update();
-        DashboardLayout.setNodeValue("example pdh channel", pdh.getCurrent(0));
+        //DashboardLayout.setNodeValue("example pdh channel", pdh.getCurrent(0));
         CommandScheduler.getInstance().run();
     }
 
@@ -101,6 +101,7 @@ public class Robot extends TimedRobot {
             autonomousCommand.cancel();
         }
         DriveSubsystem.getInstance().resetGyro();
+        DriveSubsystem.getInstance().boot();
         DriveSubsystem.getInstance().chassis.boot();
         GlobalVariables.pose = new Pose2d();
     }

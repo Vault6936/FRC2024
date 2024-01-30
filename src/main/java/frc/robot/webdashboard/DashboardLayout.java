@@ -2,23 +2,43 @@ package frc.robot.webdashboard;
 
 import org.java_websocket.WebSocket;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import javax.json.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
 public class DashboardLayout {
 
-    public ArrayList<DashboardNode> nodes;
     public final WebSocket connection;
-
     private final HashMap<String, Runnable> callbacks = new HashMap<>();
+    public ArrayList<DashboardNode> nodes;
 
     public DashboardLayout(WebSocket connection) {
         this.connection = connection;
+    }
+
+    private static DashboardNode.Type getNodeType(String inputType) {
+        DashboardNode.Type type = null;
+        DashboardNode.Type[] types = DashboardNode.Type.values();
+        for (DashboardNode.Type value : types) {
+            if (Objects.equals(value.name, inputType)) {
+                type = value;
+            }
+        }
+        return type;
+    }
+
+    public static void setNodeValue(String id, String value) {
+        JsonObject jsonObject = Json.createObjectBuilder()
+                .add("messageType", "update")
+                .add("nodeID", id)
+                .add("state", value)
+                .build();
+        WebdashboardServer.getInstance(5800).broadcast(jsonObject.toString());
+    }
+
+    public static void setNodeValue(String id, Object value) {
+        setNodeValue(id, String.valueOf(value));
     }
 
     public void update(JsonObject object) {
@@ -36,21 +56,10 @@ public class DashboardLayout {
         String nodeID = configuration.getString("id");
         for (DashboardNode node : nodes) {
             if (Objects.equals(node.id, nodeID)) {
-                node.state = configuration.getString("state");
+                node.state = ((JsonString) configuration.get("state")).getString();
                 return;
             }
         }
-    }
-
-    private static DashboardNode.Type getNodeType(String inputType) {
-        DashboardNode.Type type = null;
-        DashboardNode.Type[] types = DashboardNode.Type.values();
-        for (DashboardNode.Type value : types) {
-            if (Objects.equals(value.name, inputType)) {
-                type = value;
-            }
-        }
-        return type;
     }
 
     public boolean getBooleanValue(String id) {
@@ -88,20 +97,6 @@ public class DashboardLayout {
         }
         throw new IllegalArgumentException("Requested node does not exist");
     }
-
-    public static void setNodeValue(String id, String value) {
-        JsonObject jsonObject = Json.createObjectBuilder()
-                .add("messageType", "update")
-                .add("nodeID", id)
-                .add("state", value)
-                .build();
-        WebdashboardServer.getInstance(5800).broadcast(jsonObject.toString());
-    }
-
-    public static void setNodeValue(String id, Object value) {
-        setNodeValue(id, String.valueOf(value));
-    }
-
 
     public void buttonClicked(String id) {
         try {
