@@ -28,8 +28,19 @@ public final class Constants {
         public static final SwerveCANId rightBack = new SwerveCANId(6, 7, 23); // module 3
         public static final SwerveCANId leftBack = new SwerveCANId(8, 9, 24); // module 4
 
-        public static final int intakeDriveMotor = 10;
-        public static final int intakeTurnMotor = 11;
+        public static final int intakeDriveMotor = 61;
+        public static final int intakeTurnMotor = 60;
+        public static final int INTAKE_MOTOR = 11;
+        public static final int INTAKE_VERTICAL = 12;
+
+        public static final int SHOOTER_MOTOR_INTAKE = 13;
+        public static final int SHOOTER_MOTOR_A = 14;
+        public static final int SHOOTER_MOTOR_B = 15;
+        public static final int SHOOTER_MOTOR_ELEVATION = 17;
+    }
+
+    public static class DigitalInputs {
+        public static final int INTAKE_HOLD = 0;
     }
 
     public static final class EncoderPorts {
