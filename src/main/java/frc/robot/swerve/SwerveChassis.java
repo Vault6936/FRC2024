@@ -73,7 +73,20 @@ public class SwerveChassis<T extends MotorController> {
         this.rotationLimit = rotationLimit;
     }
 
+    public void resetPose()
+    {
+        for(SwerveModule module : modules)
+        {
+            module.driveEncoder.setPosition(0);
+        }
+    }
+
     public void drive(double x, double y, double rot, boolean squareInputs) {
+        boolean inDeadZone = false;
+        if (Math.abs(x) < Constants.driveMinSpeed && Math.abs(x) < Constants.driveMinSpeed && Math.abs(rot) < Constants.driveMinSpeed)
+        {
+            inDeadZone = true;
+        }
         if (squareInputs) {
             x = Math.copySign(Math.pow(x, 2), x);
             y = Math.copySign(Math.pow(y, 2), y);
@@ -101,12 +114,15 @@ public class SwerveChassis<T extends MotorController> {
             }
             rot = -MathUtil.clamp(headingController.calculate(0, AngleHelpers.getError(targetAngle, currentAngle)), -0.5, 0.5);
         }
+
         DashboardLayout.setNodeValue("bot target heading", Math.toDegrees(targetAngle));
         DashboardLayout layout = WebdashboardServer.getInstance(5800).getFirstConnectedLayout();
-        try {
-            headingController.setPID(Double.parseDouble(layout.getInputValue("heading_kp")), Double.parseDouble(layout.getInputValue("heading_ki")), Double.parseDouble(layout.getInputValue("heading_kd")));
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+        if(layout != null) {
+            try {
+                headingController.setPID(Double.parseDouble(layout.getInputValue("heading_kp")), Double.parseDouble(layout.getInputValue("heading_ki")), Double.parseDouble(layout.getInputValue("heading_kd")));
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
 
         double limitedDrive = driveLimit.getLimitedInputValue(inputVector.magnitude);
@@ -117,8 +133,8 @@ public class SwerveChassis<T extends MotorController> {
         limitedVector = limitedVector.rotate(-currentAngle); // This is necessary for field centric drive
 
         for (SwerveModule module : modules) {
-            module.drive(y, 0);
-            //module.rotateAndDrive(limitedVector, limitedRot);
+            //module.drive(y, 0);
+            module.rotateAndDrive(limitedVector, limitedRot, inDeadZone);
         }
 
         lastInput = new DriveInput(limitedVector, limitedRot);

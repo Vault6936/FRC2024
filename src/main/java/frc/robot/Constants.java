@@ -5,14 +5,13 @@
 
 package frc.robot;
 
-import frc.robot.swerve.Distance;
-
 public final class Constants {
 
     public static double deadZoneDefault;
 
     public static class OperatorConstants {
         public static final int DRIVER_CONTROLLER_PORT = 0;
+        public static final int PAYLOAD_CONTROLLER_PORT = 0;
     }
 
     public static final class SwerveModuleTest {
@@ -36,11 +35,26 @@ public final class Constants {
         public static final int SHOOTER_MOTOR_INTAKE = 13;
         public static final int SHOOTER_MOTOR_A = 14;
         public static final int SHOOTER_MOTOR_B = 15;
+        public static final int SHOOTER_AMP_EXTENDER = 16;
         public static final int SHOOTER_MOTOR_ELEVATION = 17;
+        public static final int CLIMBER_LEFT = 18;
+        public static final int CLIMBER_RIGHT = 19;
     }
 
     public static class DigitalInputs {
-        public static final int INTAKE_HOLD = 0;
+        public static final int INTAKE_A = 0;
+        public static final int INTAKE_B = 1;
+    }
+    public static final class PositionConstants
+    {
+        public static final double SHOOTER_LAUNCH_AMP = -10.18;
+        public static final double MIN_POSE_THRESHOLD = 0.1;
+        public static final double MIN_HEADING_THRESHOLD = 0.1;
+        public static final double MIN_POSITION_THRESHOLD = 1.5;
+        public static final double INTAKE_OUT_POSITION = -48.5;
+        public static final double INTAKE_IN_POSITION = -5;
+        public static final double INTAKE_TRANSFER_POSITION = -0.6;
+        public static final double SHOOTER_TRANSFER_POSITION = -13.5;
     }
 
     public static final class EncoderPorts {

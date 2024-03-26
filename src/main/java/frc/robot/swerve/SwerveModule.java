@@ -12,7 +12,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import frc.robot.webdashboard.WebdashboardServer;
 
 public class SwerveModule {
-    public final CANcoder encoder;
+    public final CANcoder angleEncoder;
     public final Vector2d position;
     private final CANSparkMax driveMotor;
     private final CANSparkMax steeringMotor;
@@ -25,6 +25,8 @@ public class SwerveModule {
 
     private Direction encoderPolarity = Direction.FORWARD;
 
+    private double lastStoredAngle = 0;
+
     public SwerveModule(CANSparkMax driveMotor, CANSparkMax steeringMotor, CANcoder encoder, PIDGains pidGains, Vector2d position, double encoderOffsetAngle) {
         this.driveMotor = driveMotor;
         driveEncoder = driveMotor.getEncoder();
@@ -32,7 +34,7 @@ public class SwerveModule {
         driveMotor.setOpenLoopRampRate(Constants.driveRampRate);
         steeringMotor.setOpenLoopRampRate(Constants.rotRampRate);
         this.steeringMotor = steeringMotor;
-        this.encoder = encoder;
+        this.angleEncoder = encoder;
         MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
         magnetSensorConfigs.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
         magnetSensorConfigs.MagnetOffset = encoderOffsetAngle / 360;
@@ -62,13 +64,14 @@ public class SwerveModule {
     }
 
     public double getAngleRadians() {
-        return encoder.getAbsolutePosition().getValue() * 2 * Math.PI;
+        return angleEncoder.getAbsolutePosition().getValue() * 2 * Math.PI;
     }
 
-    public void drive(double speed, double targetAngle) {
+    public void drive(double speed, double targetAngle, boolean inDeadZone) {
         try {
             controller.setD(Double.parseDouble(WebdashboardServer.getInstance(5800).getFirstConnectedLayout().getInputValue("heading_kd")));
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
         }
 
         targetAngle = AngleHelpers.unsigned_0_to_2PI(targetAngle);
@@ -81,19 +84,30 @@ public class SwerveModule {
             err = AngleHelpers.getError((targetAngle + Math.PI) % (2 * Math.PI), currentAngle);
             polarity = -1;
         }*/
-
-        driveMotor.set(MathUtil.clamp(speed * polarity * driveDirection.direction, -1.0, 1.0));
-        steeringMotor.set(MathUtil.clamp(controller.calculate(0, err), -1.0, 1.0) * turnDirection.direction);
+        if(!inDeadZone)
+        {
+            driveMotor.set(MathUtil.clamp(speed * polarity * driveDirection.direction, -1.0, 1.0));
+            steeringMotor.set(MathUtil.clamp(controller.calculate(0, err), -1.0, 1.0) * turnDirection.direction);
+        }
+        else
+        {
+            driveMotor.set(0);
+            steeringMotor.set(0);
+        }
     }
 
-    public void rotateAndDrive(Vector2d driveVector, double rotSpeed) {
+    public void rotateAndDrive(Vector2d driveVector, double rotSpeed, boolean inDeadZone) {
         double theta = position.angle - driveVector.angle;
-        Vector2d velocityVector = new Vector2d(driveVector.magnitude - radius * rotSpeed * Math.sin(theta), radius * rotSpeed * Math.cos(theta));
-        drive(velocityVector.magnitude, velocityVector.angle + driveVector.angle - Math.PI / 2);
+        Vector2d velocityVector = new Vector2d(
+                driveVector.magnitude - radius * rotSpeed * Math.sin(theta),
+                radius * rotSpeed * Math.cos(theta));
+        drive(velocityVector.magnitude, velocityVector.angle + driveVector.angle - Math.PI / 2, inDeadZone);
     }
 
     public SwerveModulePosition getOdometryData() {
-        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() / Constants.driveMotorTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI, new Rotation2d(getAngleRadians() + Math.PI / 2));
+        return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() /
+                Constants.driveMotorTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI,
+                new Rotation2d(getAngleRadians() + Math.PI / 2));
     }
 
     public enum Direction {

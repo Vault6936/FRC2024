@@ -21,7 +21,6 @@ import static frc.robot.Constants.SwerveModuleTest.testModuleIndex;
 import static frc.robot.GlobalVariables.pose;
 
 public class DriveSubsystem extends SubsystemBase {
-
     private static DriveSubsystem instance;
     public final AHRS gyro;
     public final SwerveChassis chassis;
@@ -82,19 +81,21 @@ public class DriveSubsystem extends SubsystemBase {
         rbPose = "";
     }
 
-    public void drive(double x, double y, double rot) {
+    public void drive(double x, double y, double rot, double speedM) {
+        speedM = (speedM * -0.5) + 0.5;
         if (swerveTestMode) {
             Vector2d vector = new Vector2d(x, y);
-            ((SwerveModule) chassis.modules.get(testModuleIndex)).drive(vector.magnitude, vector.angle);
+            ((SwerveModule) chassis.modules.get(testModuleIndex)).drive(vector.magnitude * speedM, vector.angle, false);
         } else {
-
-            chassis.drive(x, -y, -rot);
+            chassis.drive(x * speedM, -y * speedM, -rot * speedM);
         }
     }
 
     public void resetGyro() {
         gyro.resetDisplacement();
         gyro.zeroYaw();
+        pose = new Pose2d(0, 0, new Rotation2d(0));
+        chassis.resetPose();
     }
 
     private SwerveModulePosition[] getModulePositions() {
@@ -105,39 +106,45 @@ public class DriveSubsystem extends SubsystemBase {
         return new Rotation2d(Math.toRadians(-gyro.getAngle()));
     }
 
+    public Pose2d getPose2d() {
+        return pose;
+    }
+
     @Override
     public void periodic() {
-
         if (DriverStation.isDisabled()) {
             return;
         }
         counter++;
 
-        DashboardLayout.setNodeValue("encoder2", rightFront.getAngleRadians() * 180 / Math.PI);
-        DashboardLayout.setNodeValue("encoder3", leftBack.getAngleRadians() * 180 / Math.PI);
-        DashboardLayout.setNodeValue("encoder4", rightBack.getAngleRadians() * 180 / Math.PI);
-        DashboardLayout.setNodeValue("bot angle", pose.getRotation().getDegrees());
-        DashboardLayout.setNodeValue("pose", "x:" + pose.getTranslation().getX() + "y:" + pose.getTranslation().getY() + "heading:" + pose.getRotation().getRadians());
+        if(false) {
+            DashboardLayout.setNodeValue("encoder2", rightFront.getAngleRadians() * 180 / Math.PI);
+            DashboardLayout.setNodeValue("encoder3", leftBack.getAngleRadians() * 180 / Math.PI);
+            DashboardLayout.setNodeValue("encoder4", rightBack.getAngleRadians() * 180 / Math.PI);
+            DashboardLayout.setNodeValue("bot angle", pose.getRotation().getDegrees());
+            DashboardLayout.setNodeValue("pose", "x:" + pose.getTranslation().getX() + "y:" + pose.getTranslation().getY() + "heading:" + pose.getRotation().getRadians());
 
-        lfPose += counter + ", " + leftFront.getOdometryData().distanceMeters + ", ";
-        rfPose += counter + ", " + rightFront.getOdometryData().distanceMeters + ", ";
-        lbPose += counter + ", " + leftBack.getOdometryData().distanceMeters + ", ";
-        rbPose += counter + ", " + rightBack.getOdometryData().distanceMeters + ", ";
+            lfPose += counter + ", " + leftFront.getOdometryData().distanceMeters + ", ";
+            rfPose += counter + ", " + rightFront.getOdometryData().distanceMeters + ", ";
+            lbPose += counter + ", " + leftBack.getOdometryData().distanceMeters + ", ";
+            rbPose += counter + ", " + rightBack.getOdometryData().distanceMeters + ", ";
 
-        lfAngle += counter + ", " + leftFront.getAngleRadians() + ", ";
-        rfAngle += counter + ", " + rightFront.getAngleRadians() + ", ";
-        lbAngle += counter + ", " + leftBack.getAngleRadians() + ", ";
-        rbAngle += counter + ", " + rightBack.getAngleRadians() + ", ";
+            lfAngle += counter + ", " + leftFront.getAngleRadians() + ", ";
+            rfAngle += counter + ", " + rightFront.getAngleRadians() + ", ";
+            lbAngle += counter + ", " + leftBack.getAngleRadians() + ", ";
+            rbAngle += counter + ", " + rightBack.getAngleRadians() + ", ";
 
-        DashboardLayout.setNodeValue("lf pose", lfPose);
-        DashboardLayout.setNodeValue("rf pose", rfPose);
-        DashboardLayout.setNodeValue("lb pose", lbPose);
-        DashboardLayout.setNodeValue("rb pose", rbPose);
-        SmartDashboard.putString("lf pose", lfPose);
-        SmartDashboard.putString("rf pose", rfPose);
-        SmartDashboard.putString("lb pose", lbPose);
-        SmartDashboard.putString("rb pose", rbPose);
+            DashboardLayout.setNodeValue("lf pose", lfPose);
+            DashboardLayout.setNodeValue("rf pose", rfPose);
+            DashboardLayout.setNodeValue("lb pose", lbPose);
+            DashboardLayout.setNodeValue("rb pose", rbPose);
+            SmartDashboard.putString("lf pose", lfPose);
+            SmartDashboard.putString("rf pose", rfPose);
+            SmartDashboard.putString("lb pose", lbPose);
+            SmartDashboard.putString("rb pose", rbPose);
+        }
 
         pose = poseEstimator.update(getGyroRotation(), getModulePositions());
+        SmartDashboard.putString("RobotPose", "X:" + pose.getX() + "Y:" + pose.getY() + "O:" + pose.getRotation().getDegrees());
     }
 }

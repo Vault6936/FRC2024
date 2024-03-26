@@ -1,12 +1,13 @@
-package frc.robot.commands.shooterCommands;
+package frc.robot.commands.IntakeToShooterCommands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.Constants;
+import frc.robot.subsystems.IntakeToShooterSubsystem;
 
-public class MoveShooterToPos extends Command {
-    private final ShooterSubsystem subsystem;
+public class IntakeMoveToPos extends Command {
+    private final IntakeToShooterSubsystem subsystem;
     private double intakePos = 0;
-    public MoveShooterToPos(double IntakePos, ShooterSubsystem sub){
+    public IntakeMoveToPos(double IntakePos, IntakeToShooterSubsystem sub){
         subsystem = sub;
         intakePos = IntakePos;
         addRequirements(subsystem);
@@ -23,8 +24,6 @@ public class MoveShooterToPos extends Command {
         subsystem.setTargetPosition(intakePos);
     }
 
-
-
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
@@ -32,7 +31,7 @@ public class MoveShooterToPos extends Command {
     }
     @Override
     public boolean isFinished(){
-        if (Math.abs(intakePos - subsystem.findShooterPos()) <= .5 ){
+        if (Math.abs(intakePos - subsystem.findIntakePos()) <= Constants.PositionConstants.MIN_POSITION_THRESHOLD ){
             return true;
         }
         return false;
