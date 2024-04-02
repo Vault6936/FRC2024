@@ -156,6 +156,24 @@ public class SwerveChassis<T extends MotorController> {
                 return currentValue;
             }
         };
+
+        public static final InputLimit DEFAULT = new InputLimit() {
+            @Override
+            public double getLimitedInputValue(double currentValue, double... inputs) {
+                return MathUtil.clamp(currentValue, -Constants.DRIVE_DEFAULT_SPEED_LIMIT, Constants.DRIVE_DEFAULT_SPEED_LIMIT);
+            }
+
+            @Override
+            public double getLimitedAccelerationValue(double lastValue, double currentValue) {
+                return currentValue;
+//                if(currentValue > 0) {
+//                    return MathUtil.clamp(currentValue, 0, lastValue + Constants.DRIVE_DEFAULT_ACCEL_LIMIT);
+//                }
+//                else {
+//                    return MathUtil.clamp(currentValue, lastValue - Constants.DRIVE_DEFAULT_ACCEL_LIMIT, 0);
+//                }
+            }
+        };
     }
 
     private static class DriveInput {

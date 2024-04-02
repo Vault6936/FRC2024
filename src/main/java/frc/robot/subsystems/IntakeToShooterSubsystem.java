@@ -11,7 +11,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -22,10 +21,11 @@ public class IntakeToShooterSubsystem extends SubsystemBase
     private static IntakeToShooterSubsystem instance;
     CANSparkMax intake = new CANSparkMax(Constants.CANIds.INTAKE_MOTOR, CANSparkMax.MotorType.kBrushless);
     CANSparkMax vertical = new CANSparkMax(Constants.CANIds.INTAKE_VERTICAL, CANSparkMax.MotorType.kBrushless);
-    DigitalInput loadedLimitSwitchA = new DigitalInput(Constants.DigitalInputs.INTAKE_A);
-    DigitalInput loadedLimitSwitchB = new DigitalInput(Constants.DigitalInputs.INTAKE_B);
-    SparkPIDController verticalController;
-    RelativeEncoder encoder;
+    DigitalInput loadedLimitSwitchA = new DigitalInput(Constants.DigitalInputs.INTAKE_INSIDE_A);
+    DigitalInput loadedLimitSwitchB = new DigitalInput(Constants.DigitalInputs.INTAKE_INSIDE_B);
+    public DigitalInput LimitSwitchOut = new DigitalInput(Constants.DigitalInputs.INTAKE_OUT);
+    public DigitalInput LimitSwitchIn = new DigitalInput(Constants.DigitalInputs.INTAKE_IN);
+    public RelativeEncoder encoder;
     double targetPosition = 0;
     double lastResetTimer = Robot.timer.get();
 
@@ -35,9 +35,7 @@ public class IntakeToShooterSubsystem extends SubsystemBase
         encoder.setPosition(0.0);
         intake.setSecondaryCurrentLimit(20);
         intake.setSmartCurrentLimit(20);
-        verticalController = vertical.getPIDController();
-        verticalController.setP(0.034 + .001);
-        verticalController.setOutputRange(-0.4,0.4);
+
     }
     public static IntakeToShooterSubsystem getInstance()
     {
@@ -58,35 +56,14 @@ public class IntakeToShooterSubsystem extends SubsystemBase
             case MOTOR_STOP -> intake.set(0);
         }
     }
-    public void setTargetPosition(double TargetPos){
-        final double maxPosition;
-        if((Robot.timer.get() - lastResetTimer) > 5)
-        {
-            maxPosition = 20;
-        }
-        else
-        {
-            maxPosition = 0;
-        }
-        targetPosition = MathUtil.clamp(TargetPos, -54, maxPosition);
-        verticalController.setReference(targetPosition, CANSparkBase.ControlType.kPosition);
-    }
-    public void setVertical(double val) {
-        if (Math.abs(val) < 0.2) {
-            val = 0;
-        }
-        val = MathUtil.clamp(val, -0.4, 0.4);
-        setTargetPosition(targetPosition + (val * 0.36));
-    }
 
-    public void resetIntakePosition()
+    public void move_intake(IntakeDirection dir)
     {
-        lastResetTimer = Robot.timer.get();
-        encoder.setPosition(0);
-    }
-
-    public double findIntakePos(){
-        return encoder.getPosition();
+        switch (dir) {
+            case INTAKE_IN -> vertical.set(0.1);
+            case INTAKE_OUT -> vertical.set(-0.1);
+            case INTAKE_STOP -> vertical.set(0);
+        }
     }
 
     public boolean isLoaded()
@@ -97,6 +74,9 @@ public class IntakeToShooterSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
+
+        SmartDashboard.putBoolean("LimitSwitchIn", LimitSwitchIn.get());
+        SmartDashboard.putBoolean("LimitSwitchOut", LimitSwitchOut.get());
         SmartDashboard.putBoolean("Loaded Switch", loadedLimitSwitchA.get() || loadedLimitSwitchB.get());
         SmartDashboard.putNumber("Intake Target", targetPosition);
         SmartDashboard.putNumber("Intake Current", vertical.getOutputCurrent());

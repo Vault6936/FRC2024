@@ -15,6 +15,7 @@ public class climberDefaultCommand extends Command {
         this.climbSubsystem = climbSubsystem;
         this.leftY = leftY;
         this.rightY = rightY;
+        addRequirements(climbSubsystem);
     }
     @Override
     public void execute(){

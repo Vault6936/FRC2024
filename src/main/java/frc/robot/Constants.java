@@ -9,9 +9,10 @@ public final class Constants {
 
     public static double deadZoneDefault;
 
+
     public static class OperatorConstants {
         public static final int DRIVER_CONTROLLER_PORT = 0;
-        public static final int PAYLOAD_CONTROLLER_PORT = 0;
+        public static final int PAYLOAD_CONTROLLER_PORT = 1;
     }
 
     public static final class SwerveModuleTest {
@@ -42,17 +43,20 @@ public final class Constants {
     }
 
     public static class DigitalInputs {
-        public static final int INTAKE_A = 0;
-        public static final int INTAKE_B = 1;
+        public static final int INTAKE_INSIDE_A = 0;
+        public static final int INTAKE_INSIDE_B = 1;
+        public static final int INTAKE_IN = 2;
+        public static final int INTAKE_OUT = 3;
+
     }
     public static final class PositionConstants
     {
         public static final double SHOOTER_LAUNCH_AMP = -10.18;
         public static final double MIN_POSE_THRESHOLD = 0.1;
-        public static final double MIN_HEADING_THRESHOLD = 0.1;
-        public static final double MIN_POSITION_THRESHOLD = 1.5;
-        public static final double INTAKE_OUT_POSITION = -48.5;
-        public static final double INTAKE_IN_POSITION = -5;
+        public static final double MIN_HEADING_THRESHOLD = 5;
+        public static final double MIN_POSITION_THRESHOLD = .5;
+        public static final double INTAKE_OUT_POSITION = -48.8;
+        public static final double INTAKE_IN_POSITION = -0;
         public static final double INTAKE_TRANSFER_POSITION = -0.6;
         public static final double SHOOTER_TRANSFER_POSITION = -13.5;
     }

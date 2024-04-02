@@ -16,12 +16,11 @@ public class ClimbSubsystem extends SubsystemBase {
     private ClimbSubsystem() {
         climberLeft.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true,20,20,.1));
         climberRight.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true,20,20,.1));
-
-        climberRight.config_kP(0,.01);
-        climberLeft.config_kP(0,.01);
-
-        climberRight.setSelectedSensorPosition(0);
-        climberLeft.setSelectedSensorPosition(0);
+//        climberRight.config_kP(0,.01);
+//        climberLeft.config_kP(0,.01);
+//
+//        climberRight.setSelectedSensorPosition(0);
+//        climberLeft.setSelectedSensorPosition(0);
     }
 
     public static ClimbSubsystem getInstance(){
@@ -33,14 +32,20 @@ public class ClimbSubsystem extends SubsystemBase {
 
     public void setClimbPos(double leftY, double rightY)
     {
-        leftPosition = MathUtil.clamp(leftPosition + leftY,0,20);
-        rightPosition = MathUtil.clamp(rightPosition + rightY,0,20);
+        leftPosition = MathUtil.clamp(leftPosition + leftY,-100,100);
+        rightPosition = MathUtil.clamp(rightPosition + rightY,-100,100);
         climberRight.set(ControlMode.Position, rightPosition);
         climberLeft.set(ControlMode.Position, leftPosition);
     }
+
+    public void setClimbPower(double left, double right)
+    {
+        climberLeft.set(left);
+        climberRight.set(right);
+    }
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("leftPos: ", climberLeft.getSelectedSensorPosition());
-        SmartDashboard.putNumber("RightPos: ", climberRight.getSelectedSensorPosition());
+        //SmartDashboard.putNumber("leftPos: ", climberLeft.getSelectedSensorPosition());
+        //SmartDashboard.putNumber("RightPos: ", climberRight.getSelectedSensorPosition());
     }
 }

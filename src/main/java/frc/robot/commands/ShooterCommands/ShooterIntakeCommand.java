@@ -25,12 +25,12 @@ public class ShooterIntakeCommand extends Command {
     @Override
     public void execute()
     {
-        subsystem.setShooterMotors(dir, (speed.getAsDouble() * -0.5) + 0.5);
+        subsystem.setIntakeMotor(dir);
     }
 
     @Override
     public void end(boolean isCancelled)
     {
-        subsystem.setShooterMotors(MotorDirection.MOTOR_STOP, 0);
+        subsystem.setIntakeMotor(MotorDirection.MOTOR_STOP);
     }
 }

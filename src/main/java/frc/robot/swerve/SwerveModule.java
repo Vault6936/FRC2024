@@ -87,11 +87,14 @@ public class SwerveModule {
         if(!inDeadZone)
         {
             driveMotor.set(MathUtil.clamp(speed * polarity * driveDirection.direction, -1.0, 1.0));
+            //driveMotor.setVoltage(MathUtil.clamp(speed * polarity * driveDirection.direction * Constants.MAX_VOLTAGE_FOR_MOTORS,
+            //        -Constants.MAX_VOLTAGE_FOR_MOTORS, Constants.MAX_VOLTAGE_FOR_MOTORS));
             steeringMotor.set(MathUtil.clamp(controller.calculate(0, err), -1.0, 1.0) * turnDirection.direction);
         }
         else
         {
             driveMotor.set(0);
+            //driveMotor.set(0);
             steeringMotor.set(0);
         }
     }

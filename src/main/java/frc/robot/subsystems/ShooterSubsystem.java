@@ -18,7 +18,7 @@ public class ShooterSubsystem extends SubsystemBase
     CANSparkMax shooterB = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_B, CANSparkMax.MotorType.kBrushless);
     CANSparkMax intake = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_INTAKE, CANSparkMax.MotorType.kBrushless);
     CANSparkMax vertical = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_ELEVATION, CANSparkMax.MotorType.kBrushless);
-    CANSparkMax amp_extender = new CANSparkMax(Constants.CANIds.SHOOTER_AMP_EXTENDER, CANSparkMax.MotorType.kBrushless);
+    CANSparkMax amp_extender = new CANSparkMax(Constants.CANIds.SHOOTER_AMP_EXTENDER, CANSparkMax.MotorType.kBrushed);
     RelativeEncoder encoder;
     SparkPIDController verticalController;
     double targetPosition = 0;
@@ -29,8 +29,7 @@ public class ShooterSubsystem extends SubsystemBase
         intake.setSmartCurrentLimit(20);
         intake.setSecondaryCurrentLimit(20);
         amp_extender.setSmartCurrentLimit(20);
-        amp_extender.setSecondaryCurrentLimit(20);
-        amp_extender.getEncoder().setPosition(0);
+        amp_extender.setSecondaryCurrentLimit(15);
         encoder = vertical.getEncoder();
         encoder.setPosition(0.0);
     }
@@ -81,9 +80,9 @@ public class ShooterSubsystem extends SubsystemBase
     {
         switch (dir)
         {
-            case MOTOR_BACKWARD -> amp_extender.set(-1.0);
+            case MOTOR_BACKWARD -> amp_extender.set(-0.9);
             case MOTOR_STOP -> amp_extender.set(0);
-            case MOTOR_FORWARD -> amp_extender.set(1.0);
+            case MOTOR_FORWARD -> amp_extender.set(0.9);
         }
     }
     public void setVertical(double moveVal)
@@ -100,15 +99,15 @@ public class ShooterSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
-        double vertP =  SmartDashboard.getNumber("Shooter P", verticalController.getP());
-        if(vertP != verticalController.getP())
-        {
-            verticalController.setP(vertP);
-        }
-        SmartDashboard.putNumber("Shooter Speed", shooterA.getEncoder().getVelocity());
-        SmartDashboard.putNumber("Shooter Position", encoder.getPosition());
-        SmartDashboard.putNumber("Shooter Target", targetPosition);
-        SmartDashboard.putNumber("Shooter Current", vertical.getOutputCurrent());
-        SmartDashboard.putNumber("Shooter Intake Current", intake.getOutputCurrent());
+//        double vertP =  SmartDashboard.getNumber("Shooter P", verticalController.getP());
+//        if(vertP != verticalController.getP())
+//        {
+//            verticalController.setP(vertP);
+//        }
+//        SmartDashboard.putNumber("Shooter Speed", shooterA.getEncoder().getVelocity());
+//        SmartDashboard.putNumber("Shooter Position", encoder.getPosition());
+//        SmartDashboard.putNumber("Shooter Target", targetPosition);
+//        SmartDashboard.putNumber("Shooter Current", vertical.getOutputCurrent());
+//        SmartDashboard.putNumber("Shooter Intake Current", intake.getOutputCurrent());
     }
 }

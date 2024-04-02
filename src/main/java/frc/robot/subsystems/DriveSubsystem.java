@@ -61,7 +61,7 @@ public class DriveSubsystem extends SubsystemBase {
         rightBack.setSteeringMotorDirection(SwerveModule.Direction.REVERSE);
         rightBack.setEncoderPolarity(SwerveModule.Direction.REVERSE);
         chassis = new SwerveChassis(leftFront, rightFront, leftBack, rightBack);
-        chassis.setDriveLimit(SwerveChassis.DriveLimits.NONE);
+        chassis.setDriveLimit(SwerveChassis.DriveLimits.DEFAULT);
         chassis.setRotationLimit(SwerveChassis.DriveLimits.NONE);
         gyro = new AHRS();
 
@@ -145,6 +145,9 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         pose = poseEstimator.update(getGyroRotation(), getModulePositions());
-        SmartDashboard.putString("RobotPose", "X:" + pose.getX() + "Y:" + pose.getY() + "O:" + pose.getRotation().getDegrees());
+        SmartDashboard.putString("RobotPoseX", String.format("%.4f", pose.getX()));
+        SmartDashboard.putString("RobotPoseY", String.format("%.4f", pose.getY()));
+        SmartDashboard.putString("RobotPoseO", String.format("%.4f", pose.getRotation().getDegrees()));
+
     }
 }
