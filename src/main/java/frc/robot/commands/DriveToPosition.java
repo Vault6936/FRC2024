@@ -10,7 +10,7 @@ import frc.robot.Robot;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class DriveToPosition extends Command {
-    DriveSubsystem drive;
+    DriveSubsystem drive = DriveSubsystem.getInstance();
     Pose2d target;
     boolean hasGotToPosition = false;
     double timeGotToPosition = -1;
@@ -19,10 +19,10 @@ public class DriveToPosition extends Command {
     PIDController yController = new PIDController(7,0,0);
     PIDController zController = new PIDController(0.05,0,0);
 
-    public DriveToPosition(DriveSubsystem driveBase, Pose2d targetPosition)
+    public DriveToPosition(Pose2d targetPosition)
     {
-        drive = driveBase;
         target = targetPosition;
+        addRequirements(drive);
     }
 
     @Override

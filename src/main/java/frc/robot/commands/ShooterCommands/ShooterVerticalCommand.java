@@ -6,15 +6,13 @@ import frc.robot.subsystems.ShooterSubsystem;
 import java.util.function.DoubleSupplier;
 
 public class ShooterVerticalCommand extends Command {
-    ShooterSubsystem subsystem;
+    final ShooterSubsystem subsystem = ShooterSubsystem.getInstance();
     DoubleSupplier input;
-    public ShooterVerticalCommand(ShooterSubsystem sub, DoubleSupplier in)
+    public ShooterVerticalCommand(DoubleSupplier in)
     {
-        subsystem = sub;
         input = in;
         addRequirements(subsystem);
     }
-
     @Override
     public void execute()
     {

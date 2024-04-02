@@ -7,8 +7,8 @@ package frc.robot;
 
 public final class Constants {
 
+    public static boolean DEBUG_INFO = false;
     public static double deadZoneDefault;
-
 
     public static class OperatorConstants {
         public static final int DRIVER_CONTROLLER_PORT = 0;
@@ -59,6 +59,13 @@ public final class Constants {
         public static final double INTAKE_IN_POSITION = -0;
         public static final double INTAKE_TRANSFER_POSITION = -0.6;
         public static final double SHOOTER_TRANSFER_POSITION = -13.5;
+    }
+
+    public static final class LEDConstants
+    {
+        public static final int MAX_STRENGTH = 9;
+        public static final int MID_STRENGTH = 7;
+        public static final int LOW_STRENGTH = 5;
     }
 
     public static final class EncoderPorts {

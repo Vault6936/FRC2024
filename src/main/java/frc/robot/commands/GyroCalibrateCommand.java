@@ -8,29 +8,30 @@ import frc.robot.swerve.AngleHelpers;
 
 public class GyroCalibrateCommand extends Command {
 
+    private final DriveSubsystem subsystem = DriveSubsystem.getInstance();
     private double startTimestamp;
     private final double waitTime;
 
     public GyroCalibrateCommand(int waitTime) {
         this.waitTime = waitTime;
-        addRequirements(DriveSubsystem.getInstance());
+        addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
         startTimestamp = Robot.timer.get() * 1000;
-        DriveSubsystem.getInstance().resetGyro();
+        subsystem.resetGyro();
     }
 
     @Override
     public void execute() {
         if (Math.abs(AngleHelpers.unsigned_negative180_to_180(GlobalVariables.pose.getRotation().getDegrees())) > 2.0) {
-            DriveSubsystem.getInstance().resetGyro();
+            subsystem.resetGyro();
         }
     }
 
     @Override
     public boolean isFinished() {
-        return !DriveSubsystem.getInstance().gyro.isCalibrating() && Robot.timer.get() * 1000 > startTimestamp + waitTime;
+        return !subsystem.gyro.isCalibrating() && Robot.timer.get() * 1000 > startTimestamp + waitTime;
     }
 }

@@ -2,6 +2,7 @@ package frc.robot.swerve;
 
 public final class Constants {
 
+    public static final boolean DEBUG_INFO = false;
     public static final double MAX_VOLTAGE_FOR_MOTORS = 11.0;
     public static final double DRIVE_DEFAULT_SPEED_LIMIT = 0.75;
     public static final double DRIVE_DEFAULT_ACCEL_LIMIT = 0.02;

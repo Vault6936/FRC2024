@@ -5,12 +5,12 @@ import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.MotorDirection;
 
 public class ClimberManualCommand extends Command {
-    final ClimbSubsystem subsystem;
+    final ClimbSubsystem subsystem = ClimbSubsystem.getInstance();
     final MotorDirection direction;
 
-    public ClimberManualCommand(ClimbSubsystem sub, MotorDirection dir) {
-        this.subsystem = sub;
+    public ClimberManualCommand(MotorDirection dir) {
         this.direction = dir;
+        addRequirements(subsystem);
     }
 
     @Override

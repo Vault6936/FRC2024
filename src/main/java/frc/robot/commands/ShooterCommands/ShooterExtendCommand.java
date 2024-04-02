@@ -7,20 +7,18 @@ import frc.robot.subsystems.ShooterSubsystem;
 import java.util.function.DoubleSupplier;
 
 public class ShooterExtendCommand extends Command {
-    ShooterSubsystem subsystem;
-    MotorDirection dir;
-    DoubleSupplier speed;
-    public ShooterExtendCommand(ShooterSubsystem sub, MotorDirection direction)
+    final ShooterSubsystem subsystem = ShooterSubsystem.getInstance();
+    final MotorDirection dir;
+    final DoubleSupplier speed;
+    public ShooterExtendCommand(MotorDirection direction)
     {
-        subsystem = sub;
-        dir = direction;
-        speed = () -> (-1);
+        this(direction, () -> (-1));
     }
-    public ShooterExtendCommand(ShooterSubsystem sub, MotorDirection direction, DoubleSupplier speed)
+    public ShooterExtendCommand(MotorDirection direction, DoubleSupplier speed)
     {
-        subsystem = sub;
         dir = direction;
         this.speed = speed;
+        addRequirements(subsystem);
     }
     @Override
     public void execute()

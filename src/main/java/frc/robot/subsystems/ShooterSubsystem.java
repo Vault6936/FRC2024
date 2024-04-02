@@ -60,12 +60,15 @@ public class ShooterSubsystem extends SubsystemBase
             }
             case MOTOR_BACKWARD -> {
                 shooterB.set(-0.8 * speed);
+                double vel = shooterB.getEncoder().getVelocity();
+                LEDSubsystem.getInstance().setGreen(Constants.LEDConstants.MAX_STRENGTH, (int)((vel/ 6000) * 10));
                 if(Math.abs(shooterB.getEncoder().getVelocity()) > (3000 * speed))
                 {
                     shooterA.set(-0.8 * speed);
                 }
             }
             case MOTOR_STOP -> {
+                LEDSubsystem.getInstance().setTeam();
                 shooterA.set(0);
                 shooterB.set(0);
             }

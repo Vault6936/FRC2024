@@ -8,34 +8,35 @@ import frc.robot.subsystems.ShooterSubsystem;
 import java.util.function.DoubleSupplier;
 
 public class ShooterLaunchCommand extends Command {
-    ShooterSubsystem subsystem;
-    MotorDirection dir;
-    DoubleSupplier speed;
+    ShooterSubsystem subsystem = ShooterSubsystem.getInstance();
+    final MotorDirection dir;
+    final DoubleSupplier speed;
     double endTime = 0;
-    double secondsToShoot = 0;
-    public ShooterLaunchCommand(ShooterSubsystem sub, MotorDirection direction)
-    {
-        subsystem = sub;
-        dir = direction;
-        speed = () -> (-1);
-    }
-    public ShooterLaunchCommand(ShooterSubsystem sub, MotorDirection direction, DoubleSupplier speed)
-    {
-        subsystem = sub;
-        dir = direction;
-        this.speed = speed;
+    final double secondsToShoot;
 
+    public ShooterLaunchCommand(MotorDirection direction) {
+        this(direction,  () -> (-1),  3600);
     }
-    public ShooterLaunchCommand(ShooterSubsystem sub, MotorDirection direction, double seconds){
-        subsystem = sub;
-        dir = direction;
-        speed = () -> (-1);
-        secondsToShoot = seconds;
+
+    public ShooterLaunchCommand(MotorDirection direction, DoubleSupplier speed) {
+        this(direction, speed, 3600);
     }
+
+    public ShooterLaunchCommand(MotorDirection direction, double seconds) {
+        this(direction, () -> (-1), seconds);
+    }
+
+    private ShooterLaunchCommand(MotorDirection direction, DoubleSupplier speed, double seconds)
+    {
+        this.dir = direction;
+        this.speed = speed;
+        this.secondsToShoot = seconds;
+        addRequirements(subsystem);
+    }
+
     @Override
     public void initialize(){
         endTime = Robot.timer.get() + secondsToShoot;
-
     }
     @Override
     public void execute()

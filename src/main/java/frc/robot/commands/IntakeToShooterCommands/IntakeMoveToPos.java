@@ -7,27 +7,12 @@ import frc.robot.subsystems.IntakeToShooterSubsystem;
 import frc.robot.subsystems.MotorDirection;
 
 public class IntakeMoveToPos extends Command {
-    private final IntakeToShooterSubsystem subsystem;
+    private final IntakeToShooterSubsystem subsystem = IntakeToShooterSubsystem.getInstance();
     private IntakeDirection direction;
-    private double intakeTarget;
-
-    public IntakeMoveToPos(IntakeDirection intakeDirection, IntakeToShooterSubsystem sub){
-        subsystem = sub;
+    public IntakeMoveToPos(IntakeDirection intakeDirection){
         direction = intakeDirection;
-
         addRequirements(subsystem);
     }
-
-    // Called when the command is initially scheduled.
-//    @Override
-//    public void initialize() {
-//        if (direction == IntakeDirection.INTAKE_IN) {
-//            intakeTarget = Constants.PositionConstants.INTAKE_IN_POSITION;
-//        } else if (direction == IntakeDirection.INTAKE_OUT) {
-//            intakeTarget = Constants.PositionConstants.INTAKE_OUT_POSITION;
-//        }
-//    }
-
 
     // Called every time the scheduler runs while the command is scheduled.
     @Override
@@ -61,17 +46,6 @@ public class IntakeMoveToPos extends Command {
 
             return true;
         }
-//        if (/*Math.abs(intakeTarget - subsystem.findIntakePos()) <= Constants.PositionConstants.MIN_POSITION_THRESHOLD*/ 1==1 ){
-//            if(direction == IntakeDirection.INTAKE_IN && !subsystem.LimitSwitchIn.get())
-//            {
-//                subsystem.encoder.setPosition(intakeTarget - .1);
-//            }
-//            else if (direction == IntakeDirection.INTAKE_OUT && !subsystem.LimitSwitchOut.get()){
-//                subsystem.encoder.setPosition(intakeTarget + .1);
-//            } else {
-//                return true;
-//            }
-//        }
         return false;
     }
 }

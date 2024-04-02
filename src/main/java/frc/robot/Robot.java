@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.GyroCalibrateCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeToShooterSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.vision.Limelight;
 import frc.robot.webdashboard.DashboardLayout;
 import frc.robot.webdashboard.WebdashboardServer;
@@ -66,6 +67,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
+        LEDSubsystem.getInstance().setRainbow(Constants.LEDConstants.MID_STRENGTH, 9);
     }
 
 

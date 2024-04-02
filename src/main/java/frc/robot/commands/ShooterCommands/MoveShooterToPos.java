@@ -5,10 +5,9 @@ import frc.robot.Constants;
 import frc.robot.subsystems.ShooterSubsystem;
 
 public class MoveShooterToPos extends Command {
-    private final ShooterSubsystem subsystem;
+    private final ShooterSubsystem subsystem = ShooterSubsystem.getInstance();
     private double intakePos = 0;
-    public MoveShooterToPos(double IntakePos, ShooterSubsystem sub){
-        subsystem = sub;
+    public MoveShooterToPos(double IntakePos){
         intakePos = IntakePos;
         addRequirements(subsystem);
     }

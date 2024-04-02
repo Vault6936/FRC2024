@@ -5,8 +5,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class DriveToRelativePositionCommand extends DriveToPosition {
-    public DriveToRelativePositionCommand(DriveSubsystem driveBase, Pose2d targetPosition) {
-        super(driveBase, targetPosition);
+    public DriveToRelativePositionCommand(Pose2d targetPosition) {
+        super(targetPosition);
     }
 
     @Override

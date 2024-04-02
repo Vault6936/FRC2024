@@ -5,14 +5,12 @@ import frc.robot.subsystems.ClimbSubsystem;
 
 import java.util.function.DoubleSupplier;
 
-public class climberDefaultCommand extends Command {
-    ClimbSubsystem  climbSubsystem                                  ;
-
+public class ClimberDefaultCommand extends Command {
+    ClimbSubsystem climbSubsystem = ClimbSubsystem.getInstance();
     DoubleSupplier leftY;
     DoubleSupplier rightY;
 
-    public climberDefaultCommand(ClimbSubsystem climbSubsystem, DoubleSupplier leftY, DoubleSupplier rightY){
-        this.climbSubsystem = climbSubsystem;
+    public ClimberDefaultCommand(DoubleSupplier leftY, DoubleSupplier rightY){
         this.leftY = leftY;
         this.rightY = rightY;
         addRequirements(climbSubsystem);

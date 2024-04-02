@@ -2,38 +2,33 @@ package frc.robot.commands.IntakeToShooterCommands;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IntakeToShooterSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.MotorDirection;
 
 
 /** An example command that uses an example subsystem. */
 public class IntakeCommand extends Command
 {
-    @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final IntakeToShooterSubsystem subsystem;
-    private MotorDirection direction;
+    private final IntakeToShooterSubsystem subsystem = IntakeToShooterSubsystem.getInstance();
+    private final MotorDirection direction;
     private final double timeToRun;
     private double timeToStop;
 
     private boolean wasLoadedLastTime = false;
 
-    public IntakeCommand(IntakeToShooterSubsystem sub, MotorDirection dir)
+    public IntakeCommand(MotorDirection dir)
     {
-        direction = dir;
-        subsystem = sub;
-        this.timeToRun = 3600;
-        // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(subsystem);
+        this(dir, 3600);
     }
 
-    public IntakeCommand(IntakeToShooterSubsystem sub, MotorDirection dir, long timeToRun)
+    public IntakeCommand(MotorDirection dir, long timeToRun)
     {
         direction = dir;
-        subsystem = sub;
         this.timeToRun = timeToRun;
-        // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
     
@@ -68,6 +63,7 @@ public class IntakeCommand extends Command
         }
         if(direction == MotorDirection.MOTOR_BACKWARD) {
             if (wasLoadedLastTime) {
+                LEDSubsystem.getInstance().setOrange(Constants.LEDConstants.MAX_STRENGTH, 0);
                 return subsystem.isLoaded();
             }
             wasLoadedLastTime = subsystem.isLoaded();

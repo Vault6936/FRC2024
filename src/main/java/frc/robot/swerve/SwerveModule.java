@@ -47,7 +47,9 @@ public class SwerveModule {
     public void boot() {
         driveEncoder.setPosition(0);
         for (int i = 0; i < 30; i++) {
-            System.out.println("booted");
+            if(Constants.DEBUG_INFO) {
+                System.out.println("booted");
+            }
         }
     }
 
@@ -94,7 +96,6 @@ public class SwerveModule {
         else
         {
             driveMotor.set(0);
-            //driveMotor.set(0);
             steeringMotor.set(0);
         }
     }

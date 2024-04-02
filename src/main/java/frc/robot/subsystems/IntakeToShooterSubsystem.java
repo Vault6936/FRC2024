@@ -49,10 +49,7 @@ public class IntakeToShooterSubsystem extends SubsystemBase
     {
         switch (dir) {
             case MOTOR_FORWARD -> intake.set(1.0);
-            case MOTOR_BACKWARD -> {
-                intake.set(-0.4);
-                break;
-            }
+            case MOTOR_BACKWARD -> intake.set(-0.4);
             case MOTOR_STOP -> intake.set(0);
         }
     }
@@ -74,14 +71,14 @@ public class IntakeToShooterSubsystem extends SubsystemBase
     @Override
     public void periodic()
     {
-
-        SmartDashboard.putBoolean("LimitSwitchIn", LimitSwitchIn.get());
-        SmartDashboard.putBoolean("LimitSwitchOut", LimitSwitchOut.get());
-        SmartDashboard.putBoolean("Loaded Switch", loadedLimitSwitchA.get() || loadedLimitSwitchB.get());
-        SmartDashboard.putNumber("Intake Target", targetPosition);
-        SmartDashboard.putNumber("Intake Current", vertical.getOutputCurrent());
-        SmartDashboard.putNumber("Intake Intake Current", intake.getOutputCurrent());
-        SmartDashboard.putNumber("Intake Position", encoder.getPosition());
-        // This method will be called once per scheduler run
+        if(Constants.DEBUG_INFO) {
+            SmartDashboard.putBoolean("LimitSwitchIn", LimitSwitchIn.get());
+            SmartDashboard.putBoolean("LimitSwitchOut", LimitSwitchOut.get());
+            SmartDashboard.putBoolean("Loaded Switch", loadedLimitSwitchA.get() || loadedLimitSwitchB.get());
+            SmartDashboard.putNumber("Intake Target", targetPosition);
+            SmartDashboard.putNumber("Intake Current", vertical.getOutputCurrent());
+            SmartDashboard.putNumber("Intake Intake Current", intake.getOutputCurrent());
+            SmartDashboard.putNumber("Intake Position", encoder.getPosition());
+        }
     }
 }
