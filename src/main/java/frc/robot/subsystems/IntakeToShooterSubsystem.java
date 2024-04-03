@@ -5,10 +5,7 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,8 +32,10 @@ public class IntakeToShooterSubsystem extends SubsystemBase
         encoder.setPosition(0.0);
         intake.setSecondaryCurrentLimit(20);
         intake.setSmartCurrentLimit(20);
-
+        vertical.getPIDController().setP(0.034 + .001);
+        vertical.getPIDController().setOutputRange(-0.4,0.4);
     }
+
     public static IntakeToShooterSubsystem getInstance()
     {
         if(instance == null)
@@ -56,11 +55,29 @@ public class IntakeToShooterSubsystem extends SubsystemBase
 
     public void move_intake(IntakeDirection dir)
     {
+        vertical.getPIDController().setReference(0, CANSparkBase.ControlType.kDutyCycle);
         switch (dir) {
-            case INTAKE_IN -> vertical.set(0.1);
-            case INTAKE_OUT -> vertical.set(-0.1);
+            case INTAKE_IN -> vertical.set(0.3);
+            case INTAKE_OUT -> vertical.set(-0.3);
             case INTAKE_STOP -> vertical.set(0);
         }
+    }
+
+    public void control_intake(double pos)
+    {
+        vertical.getPIDController().setReference(0, CANSparkBase.ControlType.kDutyCycle);
+        vertical.set(pos);
+    }
+
+    public void move_toPosition(double pos)
+    {
+        pos = MathUtil.clamp(pos, Constants.PositionConstants.INTAKE_OUT_POSITION, Constants.PositionConstants.INTAKE_IN_POSITION);
+        vertical.getPIDController().setReference(pos, CANSparkBase.ControlType.kPosition);
+    }
+
+    public double getCurrentIntakePosition()
+    {
+        return vertical.getEncoder().getPosition();
     }
 
     public boolean isLoaded()

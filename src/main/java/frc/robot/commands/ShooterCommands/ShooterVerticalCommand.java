@@ -14,8 +14,7 @@ public class ShooterVerticalCommand extends Command {
         addRequirements(subsystem);
     }
     @Override
-    public void execute()
-    {
-        subsystem.setVertical(input.getAsDouble());
+    public void execute() {
+        subsystem.setVertical(input.getAsDouble() * 0.25);
     }
 }

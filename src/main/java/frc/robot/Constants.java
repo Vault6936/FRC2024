@@ -47,18 +47,27 @@ public final class Constants {
         public static final int INTAKE_INSIDE_B = 1;
         public static final int INTAKE_IN = 2;
         public static final int INTAKE_OUT = 3;
+        public static final int SHOOTER_ENCODER = 9;
 
     }
     public static final class PositionConstants
     {
-        public static final double SHOOTER_LAUNCH_AMP = -10.18;
+        public static final class Shooter
+        {
+            public static final double MINIMUM = 0.58;
+            public static final double MAXIMUM = 0.78;
+            public static final double TRANSFER_POSITION = 0.675;
+            public static final double TRAVEL_POSITION = 0.58;
+            public static final double LAUNCH_AMP = 0.68;
+            public static final double LAUNCH_SPEAKER = 0.74;
+            public static final double MIN_THRESHOLD = 0.01;
+        }
         public static final double MIN_POSE_THRESHOLD = 0.1;
         public static final double MIN_HEADING_THRESHOLD = 5;
         public static final double MIN_POSITION_THRESHOLD = .5;
         public static final double INTAKE_OUT_POSITION = -48.8;
         public static final double INTAKE_IN_POSITION = -0;
         public static final double INTAKE_TRANSFER_POSITION = -0.6;
-        public static final double SHOOTER_TRANSFER_POSITION = -13.5;
     }
 
     public static final class LEDConstants

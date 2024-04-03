@@ -20,6 +20,8 @@ public class IntakeCommand extends Command
 
     private boolean wasLoadedLastTime = false;
 
+    boolean firstRun = false;
+
     public IntakeCommand(MotorDirection dir)
     {
         this(dir, 3600);
@@ -35,13 +37,18 @@ public class IntakeCommand extends Command
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        timeToStop = Robot.timer.get() + timeToRun;
+        firstRun = true;
     }
     
     
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
+        if(firstRun)
+        {
+            timeToStop = Robot.timer.get() + timeToRun;
+            firstRun = false;
+        }
         subsystem.intake(direction);
     }
     
@@ -64,10 +71,11 @@ public class IntakeCommand extends Command
         if(direction == MotorDirection.MOTOR_BACKWARD) {
             if (wasLoadedLastTime) {
                 LEDSubsystem.getInstance().setOrange(Constants.LEDConstants.MAX_STRENGTH, 0);
+                subsystem.encoder.setPosition(0.0);
                 return subsystem.isLoaded();
             }
             wasLoadedLastTime = subsystem.isLoaded();
         }
-        return false;
+        return Robot.timer.get() > timeToStop;
     }
 }

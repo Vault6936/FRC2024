@@ -13,6 +13,7 @@ public class ShooterLaunchCommand extends Command {
     final DoubleSupplier speed;
     double endTime = 0;
     final double secondsToShoot;
+    boolean firstRun = false;
 
     public ShooterLaunchCommand(MotorDirection direction) {
         this(direction,  () -> (-1),  3600);
@@ -26,7 +27,7 @@ public class ShooterLaunchCommand extends Command {
         this(direction, () -> (-1), seconds);
     }
 
-    private ShooterLaunchCommand(MotorDirection direction, DoubleSupplier speed, double seconds)
+    public ShooterLaunchCommand(MotorDirection direction, DoubleSupplier speed, double seconds)
     {
         this.dir = direction;
         this.speed = speed;
@@ -36,22 +37,21 @@ public class ShooterLaunchCommand extends Command {
 
     @Override
     public void initialize(){
-        endTime = Robot.timer.get() + secondsToShoot;
+        firstRun = true;
     }
     @Override
     public void execute()
     {
+        if(firstRun)
+        {
+            endTime = Robot.timer.get() + secondsToShoot;
+            firstRun = false;
+        }
         subsystem.setShooterMotors(dir, (speed.getAsDouble() * -0.5) + 0.5);
     }
     @Override
     public boolean isFinished(){
-        return false;
-//        if (endTime <= 0.01){
-//            return false;
-//        } else if (Math.abs(endTime-Robot.timer.get()) > .1) {
-//            return false;
-//        }
-//        return true;
+        return (Robot.timer.get() - endTime) > 0;
     }
 
     @Override

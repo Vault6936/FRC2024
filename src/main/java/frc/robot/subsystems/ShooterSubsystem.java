@@ -7,6 +7,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,19 +21,16 @@ public class ShooterSubsystem extends SubsystemBase
     CANSparkMax intake = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_INTAKE, CANSparkMax.MotorType.kBrushless);
     CANSparkMax vertical = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_ELEVATION, CANSparkMax.MotorType.kBrushless);
     CANSparkMax amp_extender = new CANSparkMax(Constants.CANIds.SHOOTER_AMP_EXTENDER, CANSparkMax.MotorType.kBrushed);
-    RelativeEncoder encoder;
-    SparkPIDController verticalController;
+    DutyCycleEncoder encoder = new DutyCycleEncoder(Constants.DigitalInputs.SHOOTER_ENCODER);
+    PIDController verticalController = new PIDController(2, 0.01 , 0);
     double targetPosition = 0;
     private ShooterSubsystem() {
-        verticalController = vertical.getPIDController();
-        verticalController.setP(0.2);
-        verticalController.setOutputRange(-0.4,0.4);
         intake.setSmartCurrentLimit(20);
         intake.setSecondaryCurrentLimit(20);
         amp_extender.setSmartCurrentLimit(20);
         amp_extender.setSecondaryCurrentLimit(15);
-        encoder = vertical.getEncoder();
-        encoder.setPosition(0.0);
+        targetPosition = encoder.getAbsolutePosition();
+        verticalController.setSetpoint(targetPosition);
     }
 
     public static ShooterSubsystem getInstance()
@@ -61,7 +60,7 @@ public class ShooterSubsystem extends SubsystemBase
             case MOTOR_BACKWARD -> {
                 shooterB.set(-0.8 * speed);
                 double vel = shooterB.getEncoder().getVelocity();
-                LEDSubsystem.getInstance().setGreen(Constants.LEDConstants.MAX_STRENGTH, (int)((vel/ 6000) * 10));
+                LEDSubsystem.getInstance().setGreen(Constants.LEDConstants.MAX_STRENGTH, (int)((Math.abs(vel)/ 6000) * 10));
                 if(Math.abs(shooterB.getEncoder().getVelocity()) > (3000 * speed))
                 {
                     shooterA.set(-0.8 * speed);
@@ -76,8 +75,9 @@ public class ShooterSubsystem extends SubsystemBase
     }
 
     public void setTargetPosition(double targetPos){
-        targetPosition = MathUtil.clamp(targetPos, -24.1, -0.1);
-        verticalController.setReference(targetPosition, CANSparkBase.ControlType.kPosition);
+        targetPosition = MathUtil.clamp(targetPos, Constants.PositionConstants.Shooter.MINIMUM, Constants.PositionConstants.Shooter.MAXIMUM);
+        verticalController.setSetpoint(targetPos);
+        //System.out.println(power);
     }
     public void setExtenderPower(MotorDirection dir)
     {
@@ -93,24 +93,37 @@ public class ShooterSubsystem extends SubsystemBase
         if(Math.abs(moveVal) < 0.2) {
             moveVal = 0;
         }
-        setTargetPosition(targetPosition + (moveVal * 0.12));
+        setTargetPosition(targetPosition + (moveVal * 0.004));
     }
     public double findShooterPos(){
-        return encoder.getPosition()                                                                  ;
+        return encoder.getAbsolutePosition();
     }
     
     @Override
     public void periodic()
     {
+        handleVerticalArmUpdates();
+        //System.out.println(power);
 //        double vertP =  SmartDashboard.getNumber("Shooter P", verticalController.getP());
 //        if(vertP != verticalController.getP())
 //        {
 //            verticalController.setP(vertP);
 //        }
 //        SmartDashboard.putNumber("Shooter Speed", shooterA.getEncoder().getVelocity());
-//        SmartDashboard.putNumber("Shooter Position", encoder.getPosition());
+        SmartDashboard.putNumber("Shooter Position", encoder.getAbsolutePosition());
 //        SmartDashboard.putNumber("Shooter Target", targetPosition);
 //        SmartDashboard.putNumber("Shooter Current", vertical.getOutputCurrent());
 //        SmartDashboard.putNumber("Shooter Intake Current", intake.getOutputCurrent());
+    }
+
+    private void handleVerticalArmUpdates()
+    {
+        if(verticalController.getSetpoint() < 0.1 || encoder.getAbsolutePosition() < 0.1)
+        {
+            return;
+        }
+        double power = verticalController.calculate(encoder.getAbsolutePosition());
+        power = MathUtil.clamp(power, -0.30, 0.30);
+        vertical.set(power);
     }
 }

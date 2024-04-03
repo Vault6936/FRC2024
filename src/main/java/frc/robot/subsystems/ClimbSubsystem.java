@@ -37,15 +37,43 @@ public class ClimbSubsystem extends SubsystemBase {
         climberRight.set(ControlMode.Position, rightPosition);
         climberLeft.set(ControlMode.Position, leftPosition);
     }
-
+    public void setClimbCurrentPos(double currentVal)
+    {
+        climberLeft.setSelectedSensorPosition(currentVal);
+        climberRight.setSelectedSensorPosition(currentVal);
+    }
     public void setClimbPower(double left, double right)
     {
         climberLeft.set(left);
         climberRight.set(right);
     }
+
+    public void setClimbLeft(double left)
+    {
+        climberLeft.set(left);
+    }
+
+    public void setClimbRight(double power)
+    {
+        climberRight.set(power);
+    }
+    public double getRightVelocity()
+    {
+        return climberRight.getSelectedSensorVelocity();
+    }
+
+    public double getLeftVelocity()
+    {
+        return climberLeft.getSelectedSensorVelocity();
+    }
+
     @Override
     public void periodic(){
-        //SmartDashboard.putNumber("leftPos: ", climberLeft.getSelectedSensorPosition());
-        //SmartDashboard.putNumber("RightPos: ", climberRight.getSelectedSensorPosition());
+        if(Constants.DEBUG_INFO) {
+
+        }
+        SmartDashboard.putNumber("ClimbLeftPos: ", climberLeft.getSelectedSensorPosition());
+        SmartDashboard.putNumber("ClimbRightPos: ", climberRight.getSelectedSensorPosition());
+        SmartDashboard.putNumber("ClimbRightVel: ", climberRight.getSelectedSensorVelocity());
     }
 }

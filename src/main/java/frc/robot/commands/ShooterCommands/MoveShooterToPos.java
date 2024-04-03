@@ -23,8 +23,6 @@ public class MoveShooterToPos extends Command {
         subsystem.setTargetPosition(intakePos);
     }
 
-
-
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
@@ -32,7 +30,8 @@ public class MoveShooterToPos extends Command {
     }
     @Override
     public boolean isFinished(){
-        if (Math.abs(intakePos - subsystem.findShooterPos()) <= Constants.PositionConstants.MIN_POSITION_THRESHOLD ){
+        //System.out.println(Math.abs(intakePos - subsystem.findShooterPos()));
+        if (Math.abs(intakePos - subsystem.findShooterPos()) <= Constants.PositionConstants.Shooter.MIN_THRESHOLD){
             return true;
         }
         return false;

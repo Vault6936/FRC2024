@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.GyroCalibrateCommand;
+import frc.robot.commands.ShooterCommands.MoveShooterToPos;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeToShooterSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
@@ -107,6 +108,7 @@ public class Robot extends TimedRobot {
         DriveSubsystem.getInstance().boot();
         DriveSubsystem.getInstance().chassis.boot();
         GlobalVariables.pose = new Pose2d();
+        //CommandScheduler.getInstance().schedule(robotContainer.getTransferCommand());
     }
 
 
