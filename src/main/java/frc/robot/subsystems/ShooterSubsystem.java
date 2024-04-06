@@ -22,14 +22,14 @@ public class ShooterSubsystem extends SubsystemBase
     CANSparkMax vertical = new CANSparkMax(Constants.CANIds.SHOOTER_MOTOR_ELEVATION, CANSparkMax.MotorType.kBrushless);
     CANSparkMax amp_extender = new CANSparkMax(Constants.CANIds.SHOOTER_AMP_EXTENDER, CANSparkMax.MotorType.kBrushed);
     DutyCycleEncoder encoder = new DutyCycleEncoder(Constants.DigitalInputs.SHOOTER_ENCODER);
-    PIDController verticalController = new PIDController(2, 0.01 , 0);
+    PIDController verticalController = new PIDController(3, 0.001, 0);
     double targetPosition = 0;
     private ShooterSubsystem() {
         intake.setSmartCurrentLimit(20);
         intake.setSecondaryCurrentLimit(20);
         amp_extender.setSmartCurrentLimit(20);
-        amp_extender.setSecondaryCurrentLimit(15);
-        targetPosition = encoder.getAbsolutePosition();
+        amp_extender.setSecondaryCurrentLimit(20);
+        targetPosition = Constants.PositionConstants.Shooter.LAUNCH_SPEAKER;
         verticalController.setSetpoint(targetPosition);
     }
 
@@ -45,8 +45,8 @@ public class ShooterSubsystem extends SubsystemBase
     public void setIntakeMotor(MotorDirection dir)
     {
         switch (dir) {
-            case MOTOR_FORWARD -> intake.set(0.7);
-            case MOTOR_BACKWARD -> intake.set(-0.7);
+            case MOTOR_FORWARD -> intake.set(0.9);
+            case MOTOR_BACKWARD -> intake.set(-0.9);
             case MOTOR_STOP -> intake.set(0);
         }
     }
@@ -58,12 +58,13 @@ public class ShooterSubsystem extends SubsystemBase
                 shooterB.set(0.2);
             }
             case MOTOR_BACKWARD -> {
-                shooterB.set(-0.8 * speed);
+                shooterB.set(-1.0 * speed);
                 double vel = shooterB.getEncoder().getVelocity();
                 LEDSubsystem.getInstance().setGreen(Constants.LEDConstants.MAX_STRENGTH, (int)((Math.abs(vel)/ 6000) * 10));
-                if(Math.abs(shooterB.getEncoder().getVelocity()) > (3000 * speed))
+                if(Math.abs(shooterB.getEncoder().getVelocity()) > (4000 * speed)
+                        && LimeLightSensor.getInstance().getSpeakerTargetHorizontalOffset() < Constants.PositionConstants.MIN_POSITION_THRESHOLD)
                 {
-                    shooterA.set(-0.8 * speed);
+                    shooterA.set(-1.0 * speed);
                 }
             }
             case MOTOR_STOP -> {
@@ -83,9 +84,9 @@ public class ShooterSubsystem extends SubsystemBase
     {
         switch (dir)
         {
-            case MOTOR_BACKWARD -> amp_extender.set(-0.9);
+            case MOTOR_BACKWARD -> amp_extender.set(-0.55);
             case MOTOR_STOP -> amp_extender.set(0);
-            case MOTOR_FORWARD -> amp_extender.set(0.9);
+            case MOTOR_FORWARD -> amp_extender.set(0.55);
         }
     }
     public void setVertical(double moveVal)
@@ -103,17 +104,18 @@ public class ShooterSubsystem extends SubsystemBase
     public void periodic()
     {
         handleVerticalArmUpdates();
-        //System.out.println(power);
 //        double vertP =  SmartDashboard.getNumber("Shooter P", verticalController.getP());
 //        if(vertP != verticalController.getP())
 //        {
 //            verticalController.setP(vertP);
 //        }
-//        SmartDashboard.putNumber("Shooter Speed", shooterA.getEncoder().getVelocity());
+        if(Constants.DEBUG_INFO) {
+            SmartDashboard.putNumber("Shooter Speed", shooterA.getEncoder().getVelocity());
+            SmartDashboard.putNumber("Shooter Target", targetPosition);
+            SmartDashboard.putNumber("Shooter Current", vertical.getOutputCurrent());
+            SmartDashboard.putNumber("Shooter Intake Current", intake.getOutputCurrent());
+        }
         SmartDashboard.putNumber("Shooter Position", encoder.getAbsolutePosition());
-//        SmartDashboard.putNumber("Shooter Target", targetPosition);
-//        SmartDashboard.putNumber("Shooter Current", vertical.getOutputCurrent());
-//        SmartDashboard.putNumber("Shooter Intake Current", intake.getOutputCurrent());
     }
 
     private void handleVerticalArmUpdates()
@@ -122,7 +124,7 @@ public class ShooterSubsystem extends SubsystemBase
         {
             return;
         }
-        double power = verticalController.calculate(encoder.getAbsolutePosition());
+        double power = -verticalController.calculate(encoder.getAbsolutePosition());
         power = MathUtil.clamp(power, -0.30, 0.30);
         vertical.set(power);
     }

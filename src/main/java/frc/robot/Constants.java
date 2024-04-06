@@ -58,7 +58,8 @@ public final class Constants {
             public static final double MAXIMUM = 0.78;
             public static final double TRANSFER_POSITION = 0.675;
             public static final double TRAVEL_POSITION = 0.58;
-            public static final double LAUNCH_AMP = 0.68;
+            public static final double INTAKE_SOURCE = 0.747;
+            public static final double LAUNCH_AMP = 0.715;
             public static final double LAUNCH_SPEAKER = 0.74;
             public static final double MIN_THRESHOLD = 0.01;
         }

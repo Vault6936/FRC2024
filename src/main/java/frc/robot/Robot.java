@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
 
     public static Timer timer = new Timer();
     public static RobotContainer robotContainer;
-    Limelight limelight = Limelight.getInstance();
+    //Limelight limelight = Limelight.getInstance();
     PowerDistribution pdh = new PowerDistribution(Constants.CANIds.PDH_ID, PowerDistribution.ModuleType.kRev);
     private Command autonomousCommand;
 
@@ -44,7 +44,7 @@ public class Robot extends TimedRobot {
         robotContainer = new RobotContainer();
         timer.start();
         WebdashboardServer.getInstance(5800); // Initialize the websocket server
-        CommandScheduler.getInstance().schedule(new GyroCalibrateCommand(1000));
+        //CommandScheduler.getInstance().schedule(new GyroCalibrateCommand(1000));
     }
 
 
@@ -57,7 +57,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
-        limelight.update();
+        //limelight.update();
         //DashboardLayout.setNodeValue("example pdh channel", pdh.getCurrent(0));
         CommandScheduler.getInstance().run();
     }

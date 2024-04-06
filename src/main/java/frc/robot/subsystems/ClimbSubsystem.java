@@ -42,10 +42,25 @@ public class ClimbSubsystem extends SubsystemBase {
         climberLeft.setSelectedSensorPosition(currentVal);
         climberRight.setSelectedSensorPosition(currentVal);
     }
-    public void setClimbPower(double left, double right)
+    public void setClimbPower(double left, double right, ClimbMotors motors)
     {
-        climberLeft.set(left);
-        climberRight.set(right);
+        switch(motors) {
+            case BOTH: {
+                climberLeft.set(left);
+                climberRight.set(right);
+                break;
+            }
+            case RIGHT:
+            {
+                climberRight.set(right);
+                break;
+            }
+            case LEFT:
+            {
+                climberLeft.set(left);
+                break;
+            }
+        }
     }
 
     public void setClimbLeft(double left)

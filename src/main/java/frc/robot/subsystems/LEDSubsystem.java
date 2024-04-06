@@ -32,7 +32,9 @@ public class LEDSubsystem {
             strength = 9;
         }
         String s = String.format("%c%d%d", color, strength, length);
-        System.out.println(s);
+        if(Constants.DEBUG_INFO) {
+            System.out.println(s);
+        }
         serialPort.writeString(s);
     }
     public void setBlue(int strength, int length)

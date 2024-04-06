@@ -165,13 +165,13 @@ public class SwerveChassis<T extends MotorController> {
 
             @Override
             public double getLimitedAccelerationValue(double lastValue, double currentValue) {
-                return currentValue;
-//                if(currentValue > 0) {
-//                    return MathUtil.clamp(currentValue, 0, lastValue + Constants.DRIVE_DEFAULT_ACCEL_LIMIT);
-//                }
-//                else {
-//                    return MathUtil.clamp(currentValue, lastValue - Constants.DRIVE_DEFAULT_ACCEL_LIMIT, 0);
-//                }
+                //return currentValue;
+                if(currentValue > 0) {
+                    return MathUtil.clamp(currentValue, 0, lastValue + Constants.DRIVE_DEFAULT_ACCEL_LIMIT);
+                }
+                else {
+                    return MathUtil.clamp(currentValue, lastValue - Constants.DRIVE_DEFAULT_ACCEL_LIMIT, 0);
+                }
             }
         };
     }

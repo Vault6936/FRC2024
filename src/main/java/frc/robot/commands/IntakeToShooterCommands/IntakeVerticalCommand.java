@@ -27,8 +27,7 @@ public class IntakeVerticalCommand extends Command {
         if(Math.abs(move) > 0.2) {
 //            double targetPos = MathUtil.clamp(subsystem.getCurrentIntakePosition() + (move * 0.12),
 //                    Constants.PositionConstants.INTAKE_OUT_POSITION, Constants.PositionConstants.INTAKE_IN_POSITION);
-            subsystem.move_toPosition(move * 0.12);
-
+            subsystem.move_toPosition(move * 0.012);
         }
     }
 }

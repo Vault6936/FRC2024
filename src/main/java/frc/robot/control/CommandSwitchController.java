@@ -117,6 +117,19 @@ public class CommandSwitchController extends CommandGenericHID {
         return m_hid.minus(loop).castTo(Trigger::new);
     }
 
+    public Trigger home() {
+        return m_hid.home(CommandScheduler.getInstance().getDefaultButtonLoop()).castTo(Trigger::new);
+    }
+
+    public Trigger screenshot() {
+        return m_hid.screenshot(CommandScheduler.getInstance().getDefaultButtonLoop()).castTo(Trigger::new);
+    }
+
+    public Trigger getPov(int val)
+    {
+        return m_hid.pov(val, CommandScheduler.getInstance().getDefaultButtonLoop()).castTo(Trigger::new);
+    }
+
     public double getLeftX() {
         double value = m_hid.getLeftX();
         if (Math.abs(value) <= Constants.deadZoneDefault) {
