@@ -92,9 +92,15 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void resetGyro() {
+        resetGyro(0);
+    }
+
+    public void resetGyro(double angle)
+    {
         gyro.resetDisplacement();
         gyro.zeroYaw();
-        pose = new Pose2d(0, 0, new Rotation2d(0));
+        gyro.setAngleAdjustment(angle);
+        pose = new Pose2d(0, 0, new Rotation2d(angle));
         chassis.resetPose();
     }
 

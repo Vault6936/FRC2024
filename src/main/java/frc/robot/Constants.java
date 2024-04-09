@@ -56,7 +56,7 @@ public final class Constants {
         {
             public static final double MINIMUM = 0.58;
             public static final double MAXIMUM = 0.78;
-            public static final double TRANSFER_POSITION = 0.675;
+            public static final double TRANSFER_POSITION = 0.676;
             public static final double TRAVEL_POSITION = 0.58;
             public static final double INTAKE_SOURCE = 0.747;
             public static final double LAUNCH_AMP = 0.715;
@@ -69,6 +69,8 @@ public final class Constants {
         public static final double INTAKE_OUT_POSITION = -48.8;
         public static final double INTAKE_IN_POSITION = -0;
         public static final double INTAKE_TRANSFER_POSITION = -0.6;
+
+        public static final double PODIUM_START_ANGLE = 150;
     }
 
     public static final class LEDConstants

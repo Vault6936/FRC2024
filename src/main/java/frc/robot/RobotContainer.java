@@ -152,8 +152,9 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return new SequentialCommandGroup(
+                //new InstantCommand(() -> DriveSubsystem.getInstance().resetGyro(Constants.PositionConstants.PODIUM_START_ANGLE)),
                 getSpeakerShootCommand(false),
-          new DriveToRelativePositionCommand(new Pose2d(new Translation2d(-2, 0), new Rotation2d(0)))
+          new DriveToRelativePositionCommand(new Pose2d(new Translation2d(-2, 0), Rotation2d.fromDegrees(0)))
         );
     }
 }
