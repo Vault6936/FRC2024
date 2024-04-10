@@ -2,6 +2,7 @@ package frc.robot.swerve;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.motorcontrol.MotorController;
 import frc.robot.webdashboard.DashboardLayout;
 import frc.robot.webdashboard.WebdashboardServer;
@@ -33,7 +34,6 @@ public class SwerveChassis<T extends MotorController> {
         modules.add(rightFront);
         modules.add(leftBack);
         modules.add(rightBack);
-
         // Normalize the radii
         double largest = 0.0;
         for (SwerveModule module : modules) {

@@ -9,7 +9,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.webdashboard.WebdashboardServer;
+
+import static frc.robot.swerve.Constants.gearRatio;
+import static frc.robot.swerve.Constants.wheelDiameter;
 
 public class SwerveModule {
     public final CANcoder angleEncoder;
@@ -69,6 +73,12 @@ public class SwerveModule {
         return angleEncoder.getAbsolutePosition().getValue() * 2 * Math.PI;
     }
 
+    public Rotation2d getRotation2d() {return new Rotation2d(getAngleRadians());}
+
+    public double getSpeedM_s() { return driveEncoder.getVelocity() * Math.PI * wheelDiameter.getValueM() / gearRatio / 60;}
+
+    public SwerveModuleState getState() { return new SwerveModuleState(getSpeedM_s(),getRotation2d());}
+
     public void drive(double speed, double targetAngle, boolean inDeadZone) {
         try {
             controller.setD(Double.parseDouble(WebdashboardServer.getInstance(5800).getFirstConnectedLayout().getInputValue("heading_kd")));
@@ -110,7 +120,7 @@ public class SwerveModule {
 
     public SwerveModulePosition getOdometryData() {
         return new SwerveModulePosition(encoderPolarity.direction * driveEncoder.getPosition() /
-                Constants.driveMotorTicksPerRev / Constants.gearRatio * Constants.wheelDiameter.getValueM() * Math.PI,
+                Constants.driveMotorTicksPerRev / Constants.gearRatio * wheelDiameter.getValueM() * Math.PI,
                 new Rotation2d(getAngleRadians() + Math.PI / 2));
     }
 
