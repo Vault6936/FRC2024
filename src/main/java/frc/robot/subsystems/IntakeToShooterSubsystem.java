@@ -57,8 +57,8 @@ public class IntakeToShooterSubsystem extends SubsystemBase
     {
         vertical.getPIDController().setReference(0, CANSparkBase.ControlType.kDutyCycle);
         switch (dir) {
-            case INTAKE_IN -> vertical.set(0.3);
-            case INTAKE_OUT -> vertical.set(-0.3);
+            case INTAKE_READY_TO_TRANSFER_POS -> vertical.set(0.3);
+            case INTAKE_READY_TO_INTAKE_POS -> vertical.set(-0.3);
             case INTAKE_STOP -> vertical.set(0);
         }
     }

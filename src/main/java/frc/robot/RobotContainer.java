@@ -28,24 +28,83 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        //(Upper joystick: small thing at the top that is a circle)
+        //TODO SHOOTER LAUNCH CONTROL
+        //Trigger: Shoot note out of shooter
         baseController.button(1).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_BACKWARD));
-        baseController.button(2).whileTrue(new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD));
-        baseController.button(3).whileTrue(new IntakeCommand(MotorDirection.MOTOR_FORWARD));
-        baseController.button(4).whileTrue(getIntakeCommand());
-        baseController.button(6).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_FORWARD));
-        baseController.button(7).whileTrue(new IntakeMoveCommand(IntakeDirection.INTAKE_IN));
-        baseController.button(8).whileTrue(new IntakeMoveCommand(IntakeDirection.INTAKE_OUT));
 
+        //Front Middle of the Right button pad: Suck note into shooter via shooter
+        baseController.button(6).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_FORWARD));
+
+        //TODO SHOOTER INTAKE
+        //Button BELOW the upper joystick: Robot's shooter intake intakes the outtake of the intake
+        baseController.button(2).whileTrue(new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD));
+
+
+        //TODO OUTTAKE/INTAKE FULLY
+        //Button LEFT of the upper joystick: Outtake to wherever via intake
+        baseController.button(3).whileTrue(new IntakeCommand(MotorDirection.MOTOR_FORWARD));
+
+        //Button RIGHT of the upper joystick: Lower Intake; Intake; Put Intake into position to outtake to shooter
+        baseController.button(4).whileTrue(getIntakeCommand());
+
+        //TODO INTAKE VERTICAL
+        //Front Left of the Right button pad: Move Intake vertically up
+        baseController.button(7).whileTrue(new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS));
+
+        //Bottom Left of the Right button pad: Move Intake vertically down
+        baseController.button(8).whileTrue(new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_INTAKE_POS));
+
+
+        //TODO GYRO RESET
+        //Bottom Right of the Right button pad: Reset Gyro
         baseController.button(10).onTrue(new InstantCommand(DriveSubsystem.getInstance()::resetGyro));
 
+
+        //TODO SHOOTER AIM
+        //Front Right of the Left button pad: Raise shooter aim
         baseController.button(13).whileTrue(new ShooterVerticalCommand(() -> 1.5));
+
+        //Bottom Right of the Left button pad: Lower shooter aim
         baseController.button(14).whileTrue(new ShooterVerticalCommand(() -> -1.5));
 
+
+        //TODO CLIMBER
+        //Front Left of the Left button pad: Raise Climber
         baseController.button(11).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_FORWARD));
+
+        //Bottom Left of the Left button pad: Lower Climber
         baseController.button(16).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_BACKWARD));
 
+
+        //TODO AMP SCORE STICK
+        //Front Middle of the Left button pad
         baseController.button(12).whileTrue(new ShooterExtendCommand(MotorDirection.MOTOR_BACKWARD));
+
+        //Bottom Middle of the Left button pad
         baseController.button(15).whileTrue(new ShooterExtendCommand(MotorDirection.MOTOR_FORWARD));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         payload.y().whileTrue(getAmpShootCommand());
 
@@ -82,7 +141,7 @@ public class RobotContainer {
     {
         return new SequentialCommandGroup(
                 new InstantCommand(LimeLightSensor.getInstance()::setAmpTargetID),
-                new IntakeMoveCommand(IntakeDirection.INTAKE_IN),
+                new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS),
                 new MoveShooterToPos(Constants.PositionConstants.Shooter.TRANSFER_POSITION),
                 new WaitCommand(0.5),
                 new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD,0.4),
@@ -134,9 +193,10 @@ public class RobotContainer {
     public Command getIntakeCommand()
     {
         return new SequentialCommandGroup(
-                new IntakeMoveCommand(IntakeDirection.INTAKE_OUT),
+                new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_INTAKE_POS),
+                //Intake
                 new IntakeCommand(MotorDirection.MOTOR_BACKWARD, 8),
-                new IntakeMoveCommand(IntakeDirection.INTAKE_IN)
+                new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS)
         );
     }
 

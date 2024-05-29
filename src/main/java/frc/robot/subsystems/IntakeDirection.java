@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 public enum IntakeDirection {
-    INTAKE_OUT,
-    INTAKE_IN,
+    INTAKE_READY_TO_INTAKE_POS,
+    INTAKE_READY_TO_TRANSFER_POS,
     INTAKE_STOP
 }

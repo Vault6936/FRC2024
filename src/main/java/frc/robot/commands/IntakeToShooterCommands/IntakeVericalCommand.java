@@ -4,10 +4,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.IntakeDirection;
 import frc.robot.subsystems.IntakeToShooterSubsystem;
 
-public class IntakeMoveCommand extends Command {
+public class IntakeVericalCommand extends Command {
     private final IntakeToShooterSubsystem subsystem = IntakeToShooterSubsystem.getInstance();
     private final IntakeDirection direction;
-    public IntakeMoveCommand(IntakeDirection intakeDirection){
+    public IntakeVericalCommand(IntakeDirection intakeDirection){
         direction = intakeDirection;
         addRequirements(subsystem);
     }
@@ -27,13 +27,13 @@ public class IntakeMoveCommand extends Command {
     @Override
     public boolean isFinished(){
 
-        if(direction == IntakeDirection.INTAKE_IN && subsystem.LimitSwitchIn.get())
+        if(direction == IntakeDirection.INTAKE_READY_TO_TRANSFER_POS && subsystem.LimitSwitchIn.get())
         {
             subsystem.move_intake(IntakeDirection.INTAKE_STOP);
 
             return true;
         }
-        if (direction == IntakeDirection.INTAKE_OUT && subsystem.LimitSwitchOut.get())
+        if (direction == IntakeDirection.INTAKE_READY_TO_INTAKE_POS && subsystem.LimitSwitchOut.get())
         {
             subsystem.move_intake(IntakeDirection.INTAKE_STOP);
 
