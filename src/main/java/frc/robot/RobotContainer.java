@@ -28,106 +28,143 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        //(Upper joystick: small thing at the top that is a circle)
-        //TODO SHOOTER LAUNCH CONTROL
-        //Trigger: Shoot note out of shooter
+        // (Upper joystick: small thing at the top that is a circle)
+
+        //TODO   SHOOTER LAUNCH CONTROL:
+
+        // Trigger: Shoot note out of shooter
         baseController.button(1).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_BACKWARD));
 
-        //Front Middle of the Right button pad: Suck note into shooter via shooter
+        // Front Middle of the Right button pad: Suck note into shooter via shooter
         baseController.button(6).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_FORWARD));
 
-        //TODO SHOOTER INTAKE
-        //Button BELOW the upper joystick: Robot's shooter intake intakes the outtake of the intake
+        //TODO   SHOOTER INTAKE:
+
+        // Button BELOW the upper joystick: Robot's shooter intake intakes the outtake of the intake
         baseController.button(2).whileTrue(new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD));
 
 
-        //TODO OUTTAKE/INTAKE FULLY
-        //Button LEFT of the upper joystick: Outtake to wherever via intake
+        //TODO   OUTTAKE/INTAKE FULLY:
+
+        // Button LEFT of the upper joystick: Outtake to wherever via intake
         baseController.button(3).whileTrue(new IntakeCommand(MotorDirection.MOTOR_FORWARD));
 
-        //Button RIGHT of the upper joystick: Lower Intake; Intake; Put Intake into position to outtake to shooter
+        // Button RIGHT of the upper joystick: Lower Intake; Intake; Put Intake into position to outtake to shooter
         baseController.button(4).whileTrue(getIntakeCommand());
 
-        //TODO INTAKE VERTICAL
-        //Front Left of the Right button pad: Move Intake vertically up
+        //TODO   INTAKE VERTICAL:
+
+        // Front Left of the Right button pad: Move Intake vertically up
         baseController.button(7).whileTrue(new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS));
 
-        //Bottom Left of the Right button pad: Move Intake vertically down
+        // Bottom Left of the Right button pad: Move Intake vertically down
         baseController.button(8).whileTrue(new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_INTAKE_POS));
 
 
-        //TODO GYRO RESET
-        //Bottom Right of the Right button pad: Reset Gyro
+        //TODO   GYRO RESET:
+
+        // Bottom Right of the Right button pad: Reset Gyro
         baseController.button(10).onTrue(new InstantCommand(DriveSubsystem.getInstance()::resetGyro));
 
 
-        //TODO SHOOTER AIM
-        //Front Right of the Left button pad: Raise shooter aim
+        //TODO   SHOOTER AIM:
+
+        // Front Right of the Left button pad: Raise shooter aim
         baseController.button(13).whileTrue(new ShooterVerticalCommand(() -> 1.5));
 
-        //Bottom Right of the Left button pad: Lower shooter aim
+        // Bottom Right of the Left button pad: Lower shooter aim
         baseController.button(14).whileTrue(new ShooterVerticalCommand(() -> -1.5));
 
 
-        //TODO CLIMBER
-        //Front Left of the Left button pad: Raise Climber
+        //TODO   CLIMBER:
+
+        // Front Left of the Left button pad: Raise Climber
         baseController.button(11).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_FORWARD));
 
-        //Bottom Left of the Left button pad: Lower Climber
+        // Bottom Left of the Left button pad: Lower Climber
         baseController.button(16).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_BACKWARD));
 
 
-        //TODO AMP SCORE STICK
-        //Front Middle of the Left button pad
+        //TODO   AMP SCORE STICK:
+
+        // Front Middle of the Left button pad
         baseController.button(12).whileTrue(new ShooterExtendCommand(MotorDirection.MOTOR_BACKWARD));
 
-        //Bottom Middle of the Left button pad
+        // Bottom Middle of the Left button pad
         baseController.button(15).whileTrue(new ShooterExtendCommand(MotorDirection.MOTOR_FORWARD));
 
 
+        //TODO  GAME CONTROLLER:
 
 
+        //TODO   TRANSFER:
 
+        // B Button: Transfer a note fully
+        payload.b().whileTrue(getTransferCommand());
 
+        //TODO   SHOOT IN AMP:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // Y Button: Move Shooter to shoot at amp; Extend Amp Arm; Shoot, Retract Amp Arm
         payload.y().whileTrue(getAmpShootCommand());
 
+        // Ignore
         payload.a().whileTrue(getSpeakerShootCommand(false));
 
-        payload.b().whileTrue(getTransferCommand());
+        //TODO   INTAKE A NOTE:
+
+        // X Button: Intake a note
         payload.x().whileTrue(getIntakeCommand());
+
+        //TODO   ROBOT SHOOTER "BUMPER":
+
+        // Plus Button: Robot's shooter intakes from the Intake
         payload.plus().whileTrue(new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD));
+
+        // Minus Button: Robot's shooter pushes note out
         payload.minus().whileTrue(new ShooterIntakeCommand(MotorDirection.MOTOR_FORWARD));
+
+        //TODO   ROBOT INTAKE WHEEL:
+
+        // Home Button: Run Intake to intake a note
         payload.home().whileTrue(new IntakeCommand(MotorDirection.MOTOR_BACKWARD));
+
+        // Screenshot button: Spit out a note via Intake
         payload.screenshot().whileTrue(new IntakeCommand(MotorDirection.MOTOR_FORWARD));
 
+        //TODO   CLIMBER MOVE UP
+
+        // Left Button: Move left climber up
         payload.l().and(payload.r().negate()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_FORWARD, ClimbMotors.LEFT));
+
+        // Right Button: Move right climber up
         payload.r().and(payload.l().negate()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_FORWARD, ClimbMotors.RIGHT));
+
+        // Ignore.
         payload.r().and(payload.l()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_FORWARD, ClimbMotors.BOTH));
+
+        // TODO CLIMBER MOVE DOWN
+
+        // Left Trigger: Move left climber down
         payload.zl().and(payload.zr().negate()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_BACKWARD, ClimbMotors.LEFT));
+
+        // Right Trigger: Move right climber down
         payload.zr().and(payload.zl().negate()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_BACKWARD, ClimbMotors.RIGHT));
+
+        // Ignore
         payload.zr().and(payload.zl()).whileTrue(new ClimberManualCommand(MotorDirection.MOTOR_BACKWARD, ClimbMotors.BOTH));
 
-        payload.pov(180).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_FORWARD, () -> 0.2));
+        // TODO SHOOTER ANGLE CONSTANTS
+
+        // D-Pad Up: Move Shooter to intake from source
         payload.pov(0).whileTrue(getShooterSourceIntakeCommand());
+
+        // D-Pad Left: Move Shooter to Travel Pos
         payload.pov(270).whileTrue(getShooterTravelCommand());
 
+        // TODO PREPARE NOTE TO LAUNCH
+
+        // D-Pad Down: Suck note into shooter via shooter
+        payload.pov(180).whileTrue(new ShooterLaunchCommand(MotorDirection.MOTOR_FORWARD, () -> 0.2));
 
 
         DriveSubsystem.getInstance().setDefaultCommand(driveDefaultCommand);
