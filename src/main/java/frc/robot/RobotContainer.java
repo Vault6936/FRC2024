@@ -15,6 +15,8 @@ import frc.robot.commands.IntakeToShooterCommands.*;
 import frc.robot.control.CommandSwitchController;
 import frc.robot.subsystems.*;
 
+import java.util.function.DoubleSupplier;
+
 public class RobotContainer {
     private final CommandJoystick baseController = new CommandJoystick(OperatorConstants.DRIVER_CONTROLLER_PORT);
     public final CommandSwitchController payload = new CommandSwitchController(OperatorConstants.PAYLOAD_CONTROLLER_PORT);
@@ -181,8 +183,8 @@ public class RobotContainer {
                 new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS),
                 new MoveShooterToPos(Constants.PositionConstants.Shooter.TRANSFER_POSITION),
                 new WaitCommand(0.5),
-                new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD,0.4),
-                new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD,0.8),
+                new ShooterIntakeCommand(MotorDirection.MOTOR_FORWARD,0.314159),
+                new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD,0.885841),
                 new ParallelCommandGroup(
                         new IntakeCommand(MotorDirection.MOTOR_FORWARD,1),
                         new ShooterIntakeCommand(MotorDirection.MOTOR_BACKWARD, 1)
@@ -233,6 +235,11 @@ public class RobotContainer {
                 new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_INTAKE_POS),
                 //Intake
                 new IntakeCommand(MotorDirection.MOTOR_BACKWARD, 8),
+                //Moving note back and forth to align it correctly using the mechanum wheels.
+                new IntakeCommand(MotorDirection.MOTOR_FORWARD, 0.1),
+                new IntakeCommand(MotorDirection.MOTOR_BACKWARD, 0.1),
+                new IntakeCommand(MotorDirection.MOTOR_FORWARD, 0.1),
+                new IntakeCommand(MotorDirection.MOTOR_BACKWARD, 0.5),
                 new IntakeVericalCommand(IntakeDirection.INTAKE_READY_TO_TRANSFER_POS)
         );
     }

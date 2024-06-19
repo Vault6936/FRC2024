@@ -25,7 +25,7 @@ public class IntakeCommand extends Command
         this(dir, 3600);
     }
 
-    public IntakeCommand(MotorDirection dir, long timeToRun)
+    public IntakeCommand(MotorDirection dir, double timeToRun)
     {
         direction = dir;
         this.timeToRun = timeToRun;
